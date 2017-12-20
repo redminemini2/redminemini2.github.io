@@ -66,6 +66,7 @@
     "webpack": "^1.12.11"
   },
   "dependencies": {
+    "angular-ui-grid": "^4.1.0",
     "lodash": "^4.17.4",
     "lodash.throttle": "^4.1.1"
   }

@@ -407,7 +407,7 @@
                 //     vm.gridOptions.columnDefs[j].cellFilter = 'date:"yyyy-MM-dd"'
                 // }
             };
-            console.log(vm.gridOptions.columnDefs);
+            // console.log(vm.gridOptions.columnDefs);
 
             // vm.gridOptions.multiSelect = true;
 
