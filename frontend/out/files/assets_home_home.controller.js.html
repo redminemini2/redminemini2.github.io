@@ -29,6 +29,7 @@
                     <div id="api-tabview" class="tabview">
                         <ul class="tabs">
                             <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-elements">Elements</a></li>
                             <li><a href="#api-modules">Modules</a></li>
                         </ul>
                 
@@ -50,6 +51,13 @@
                                 <li><a href="../classes/ServiceUserlocalStorage.html">ServiceUserlocalStorage</a></li>
                             </ul>
                 
+                                <ul id="api-elements" class="apis elements">
+                                    <li><a href="../elements/ANY.html">&lt;ANY&gt;</a></li>
+                                    <li><a href="../elements/div.html">&lt;div&gt;</a></li>
+                                    <li><a href="../elements/img.html">&lt;img&gt;</a></li>
+                                    <li><a href="../elements/input.html">&lt;input&gt;</a></li>
+                                    <li><a href="../elements/style.html">&lt;style&gt;</a></li>
+                                </ul>
                 
                             <ul id="api-modules" class="apis modules">
                                 <li><a href="../modules/app.html">app</a></li>
@@ -95,29 +103,39 @@
 
     angular
         .module(&#x27;app&#x27;)
-        .controller(&#x27;HomeController&#x27;, HomeController);
+        .controller(&#x27;HomeController&#x27;, HomeController)
+        .filter(&#x27;id_list&#x27;, id_list)
+        .filter(&#x27;execution_status&#x27;, execution_status)
+        .filter(&#x27;id_user&#x27;, id_user)
 
         /**
         * ПРЕДОСТАВЛЕНИЕ ДАННЫХ В ВИДЕ DRAG&amp;DROP И ng-GRID
+            
+            (function () {
+                angular
+                    .module(&#x27;app&#x27;)
+                    .controller(&#x27;HomeController&#x27;, HomeController)
+                    .filter(&#x27;id_list&#x27;, id_list)
+                    .filter(&#x27;execution_status&#x27;, execution_status)
+                    .filter(&#x27;id_user&#x27;, id_user)
 
-            HomeController.$inject = [&#x27;UserService&#x27;, &#x27;JsonService&#x27;, &#x27;$rootScope&#x27;];
-            ........
+                 HomeController.$inject = [&#x27;UserService&#x27;, &#x27;JsonService&#x27;, &#x27;uiGridConstants&#x27;,&#x27;$rootScope&#x27;, &#x27;$timeout&#x27;];
+                ........
 
         * @class HomeController
         * @module app
         * @main HomeController
         */
 
-    HomeController.$inject = [&#x27;UserService&#x27;, &#x27;JsonService&#x27;, &#x27;$rootScope&#x27;];
+    HomeController.$inject = [&#x27;UserService&#x27;, &#x27;JsonService&#x27;, &#x27;uiGridConstants&#x27;,&#x27;$rootScope&#x27;, &#x27;$timeout&#x27;];
 
-    function HomeController(UserService, JsonService, $rootScope) {
+    function HomeController(UserService, JsonService, uiGridConstants, $rootScope, $timeout) {
         var vm = this;
 
     /*========================ВСЕ ЧТО НУЖНО ДЛЯ HTML========================*/
         /**
          * &lt;p&gt;ВСЕ ЧТО &quot;ПРЕДАЕТСЯ&quot;&quot; В HTML&lt;/p&gt;
-
-            vm.tasck_limit = 15; //ОГРАНИЧИТЕЛЬ ЗАДАЧ В ЛИСТЕ
+            vm.tasck_limit = 15;
             vm.ngGridView = null;
 
             vm.user = null;
@@ -169,15 +187,25 @@
                     })
                   }
                 }
-            };
+            }; 
+
+            vm.status = [
+                {id: 1, name:&#x27;Ожидает&#x27;},
+                {id: 2, name:&#x27;В работе&#x27;},
+                {id: 3, name:&#x27;Выполнено&#x27;},
+            ];
+
             $(&#x27;#dtpckr&#x27;).datepicker();
+
+            var gridnameJsonLists = [];
+            let curUser = false;
 
          * @property ДАННЫЕ ДЛЯ HTML
          * @type Object
          * @static
          * @final
          */
-        vm.tasck_limit = 15; //ОГРАНИЧИТЕЛЬ ЗАДАЧ В ЛИСТЕ
+        vm.tasck_limit = 15;
         vm.ngGridView = null;
 
         vm.user = null;
@@ -231,22 +259,26 @@
             }
         }; 
 
-    /*==============================ИНИЦИАЦИЯ==============================*/
+        vm.status = [
+            {id: 1, name:&#x27;Ожидает&#x27;},
+            {id: 2, name:&#x27;В работе&#x27;},
+            {id: 3, name:&#x27;Выполнено&#x27;},
+        ];
+    /*=====================================================================*/
+        
         $(&#x27;#dtpckr&#x27;).datepicker();
 
         var gridnameJsonLists = [];
-
+        let curUser = false;
+    /*==============================ИНИЦИАЦИЯ==============================*/
         //ИНИЦИИРУЕМ КОНТРОЛЛЕР
         initController();
 
         //АГРЕГАТНАЯ ФУНКЦИЯ ИНИЦИИ КОНТРОЛЛЕРА СОСТОИТ ИЗ НЕСКОЛЬКИХ &quot;ВЫЗЫВАЮЩИХ&quot;&quot; ФУНКЦИЙ
         function initController() {
 
-            //ЗАГРУЖАЕМ ТЕКУЩЕГО ЮЗЕРА ФАБРИКА UserService
-            loadCurrentUser(); //frontend/assets/app-services/user.service.js
-
             //ЗАГРУЖАЕМ ВСЕХ ЮЗЕРОВ ФАБРИКА UserService
-            loadAllUsers(); //frontend/assets/app-services/user.service.js       
+            loadAllUsers(); //frontend/assets/app-services/user.service.js
 
             // ИМПОРТИРУЕМ СПИСОК ЛИСТОВ ФАБРИКА UserService
             getJsonLists(); //frontend/assets/app-services/json_service.js
@@ -254,17 +286,14 @@
             //ИМПОРТИРУЕМ СПИСОК ЗАДАЧ ФАБРИКА UserService 
             getJsonTasks(); //frontend/assets/app-services/json_service.js
 
-            //СОЗДАЕМ СОДЕРЖИМОЕ ДЛЯ ДРАГнДРОП ЛИСТОВ
-            createSheets(vm.resgetJsonLists);
-
             // ИМПОРТИРУЕМ СПИСОК ИМЕН СТОЛБЦОВ ГРИДА
-            getJsonGridname();
+            getJsonGridname();   
 
-            //СОЗДАЁМ ГРИД
-            initGrid();
+            //ЗАГРУЖАЕМ ТЕКУЩЕГО ЮЗЕРА + СОЗДАЕМ СОДЕРЖИМОЕ ДЛЯ ДРАГнДРОП ЛИСТОВ
+            createSheets(vm.resgetJsonLists);
         }; 
-
     /*==========================ОПЕРАТИВНЫЕ ФУНКЦИИ==========================*/
+
         //ФУНКЦИЯ ИМПОРТА СПИСКА ИМЕН ПОЛЕЙ ГРИДА
         function getJsonGridname(){
             gridnameJsonLists = JsonService.getResultFromJson(&#x27;db/gridname.json&#x27;)
@@ -273,6 +302,7 @@
         //ФУНКЦИЯ ИМПОРТА СПИСКА ЛИСТОВ
         function getJsonLists(){
             vm.resgetJsonLists = JsonService.getResultFromJson(&#x27;db/listsName.json&#x27;)
+            JsonService.list = vm.resgetJsonLists;
         };
 
         //ФУНКЦИЯ ИМПОРТА СПИСКА ЗАДАЧ
@@ -282,11 +312,15 @@
 
         /**
          * @description ФУНКЦИОНАЛ makeList (id_list):&lt;br&gt;
-         * ВОЗВРАЩАЕТ ОТФИЛЬТРОВАННЫЙ ПО ПОЛЮ - id_list МАССИВ ЗАДАЧ&lt;br&gt;
-
+         * ВОЗВРАЩАЕТ ОТФИЛЬТРОВАННЫЙ ПО ПОЛЯМ: id_list/id_user МАССИВ ЗАДАЧ&lt;br&gt;
+                
                 function makeList (id_list) {
                     var filter_resjsontasks = [];
-                    filter_resjsontasks = vm.resjsontasks.filter(item =&gt; item.id_list == id_list);
+                    if(vm.user.id != 1) {
+                        filter_resjsontasks = vm.resjsontasks.filter(item =&gt; item.id_list == id_list &amp;&amp; item.id_user == vm.user.id);
+                    }else{
+                        filter_resjsontasks = vm.resjsontasks.filter(item =&gt; item.id_list == id_list);
+                    }
                     return filter_resjsontasks;
                 };
 
@@ -294,35 +328,71 @@
          * @param {Integer} id_list ID ЛИСТА
          * @return {Object} filter_resjsontasks
          */ 
-        //ФУНКЦИЯ НАПОЛНЕНИЯ КАЖДОГО ЛИСТА ЗАДАЧАМИ (ПО id_list) ВЫЗЫВАЕТСЯ ИЗ  createSheets()
         function makeList (id_list) {
             var filter_resjsontasks = [];
-            filter_resjsontasks = vm.resjsontasks.filter(item =&gt; item.id_list == id_list);
+            if(vm.user.id != 1) {
+                filter_resjsontasks = vm.resjsontasks.filter(item =&gt; item.id_list == id_list &amp;&amp; item.id_user == vm.user.id);
+            }else{
+                filter_resjsontasks = vm.resjsontasks.filter(item =&gt; item.id_list == id_list);
+            }
             return filter_resjsontasks;
         };
 
         /**
          * @description ФУНКЦИОНАЛ createSheets (resgetJsonLists):&lt;br&gt;
          * ЦИКЛОМ СОЗДАЮТСЯ ЛИСТЫ. ЛИСТАМ ПРИСВАИВАЕТСЯ ИМЯ И ID&lt;br&gt; СОЗДАННЫЕ ЛИСТЫ ДОБАВЛЯЮТСЯ В МАССИВ vm.rawScreens
-
+                
                 function createSheets(resgetJsonLists){
-                    for(let i=0; i &lt; resgetJsonLists.length; i++){
-                        vm[&#x27;list_&#x27; + resgetJsonLists[i].id] = makeList(resgetJsonLists[i].id);
-                        vm[&#x27;list_&#x27; + resgetJsonLists[i].id].name = resgetJsonLists[i].name;
-                        vm.rawScreens.push(vm[&#x27;list_&#x27; + resgetJsonLists[i].id]);
-                    };
+                    if(!curUser){
+                        UserService.GetByUsername($rootScope.globals.currentUser.username)
+                        .then(function (user) {
+                            // console.log(&#x27;user&#x27;, user);
+                            vm.user = user;
+                            for(let i=0; i &lt; resgetJsonLists.length; i++){
+                                vm[&#x27;list_&#x27; + resgetJsonLists[i].id] = makeList(resgetJsonLists[i].id);
+                                vm[&#x27;list_&#x27; + resgetJsonLists[i].id].name = resgetJsonLists[i].name;
+                                vm.rawScreens.push(vm[&#x27;list_&#x27; + resgetJsonLists[i].id]);
+                            };
+                            curUser = true;
+                            //СОЗДАЁМ ГРИД
+                            initGrid();
+                        });
+                    }else{
+                        for(let i=0; i &lt; resgetJsonLists.length; i++){
+                            vm[&#x27;list_&#x27; + resgetJsonLists[i].id] = makeList(resgetJsonLists[i].id);
+                            vm[&#x27;list_&#x27; + resgetJsonLists[i].id].name = resgetJsonLists[i].name;
+                            vm.rawScreens.push(vm[&#x27;list_&#x27; + resgetJsonLists[i].id]);
+                        };
+                    }
                 };
 
+         * ПРИ ПЕРВОМ ПРОХОДЕ СОЗДАЕМ ГРИД 
          * @method createSheets
          * @param {Object} resgetJsonLists МАССИВ ИМЕН ЛИСТОВ
          */ 
         //ФУНКЦИЯ СОЗДАНИЯ ЛИСТОВ
         function createSheets(resgetJsonLists){
-            for(let i=0; i &lt; resgetJsonLists.length; i++){
-                vm[&#x27;list_&#x27; + resgetJsonLists[i].id] = makeList(resgetJsonLists[i].id);
-                vm[&#x27;list_&#x27; + resgetJsonLists[i].id].name = resgetJsonLists[i].name;
-                vm.rawScreens.push(vm[&#x27;list_&#x27; + resgetJsonLists[i].id]);
-            };
+            if(!curUser){
+                UserService.GetByUsername($rootScope.globals.currentUser.username)
+                .then(function (user) {
+                    // console.log(&#x27;user&#x27;, user);
+                    vm.user = user;
+                    for(let i=0; i &lt; resgetJsonLists.length; i++){
+                        vm[&#x27;list_&#x27; + resgetJsonLists[i].id] = makeList(resgetJsonLists[i].id);
+                        vm[&#x27;list_&#x27; + resgetJsonLists[i].id].name = resgetJsonLists[i].name;
+                        vm.rawScreens.push(vm[&#x27;list_&#x27; + resgetJsonLists[i].id]);
+                    };
+                    curUser = true;
+                    //СОЗДАЁМ ГРИД
+                    initGrid();
+                });
+            }else{
+                for(let i=0; i &lt; resgetJsonLists.length; i++){
+                    vm[&#x27;list_&#x27; + resgetJsonLists[i].id] = makeList(resgetJsonLists[i].id);
+                    vm[&#x27;list_&#x27; + resgetJsonLists[i].id].name = resgetJsonLists[i].name;
+                    vm.rawScreens.push(vm[&#x27;list_&#x27; + resgetJsonLists[i].id]);
+                };
+            }
         };
 
         /**
@@ -335,162 +405,222 @@
             
             for(let j=0; j &lt; tt.length; j++){
                 if(tt[j].id != &quot;$$hashKey&quot;) {
-                    if(tt[j].id == &quot;execution_status&quot; || tt[j].id == &quot;id_list&quot;){
-                        if(tt[j].id == &quot;execution_status&quot;) {
-                            myCelTemp = myCelTemp1;
-                        }else{
-                            myCelTemp = myCelTemp2;
-                        };
-
-                        str = &#x27;{&quot;field&quot; : &quot;&#x27; + tt[j].id + &#x27;&quot;&#x27; + &#x27;,&#x27; + &#x27;&quot;cellTemplate&quot; : &quot;&#x27; + myCelTemp + &#x27;&quot;}&#x27; //&#x27; + &#x27;&quot;enableFiltering&quot; : &#x27; + false + 
-                        vm.ngGridView.columnDefs.push(JSON.parse(str)); 
-                    }else{
-                        str = &#x27;{&quot;field&quot; : &quot;&#x27; + tt[j].id + &#x27;&quot;&#x27; + &#x27;,&#x27; + &#x27;&quot;displayName&quot; : &quot;&#x27; + gridnameJsonLists[j].id + &#x27;&quot;}&#x27; //&#x27; + &#x27;&quot;enableFiltering&quot; : &#x27; + false + 
-                        vm.ngGridView.columnDefs.push(JSON.parse(str)); 
-                    }
-                }
+                        str = &#x27;{&quot;field&quot; : &quot;&#x27; + tt[j].id + &#x27;&quot;&#x27; + &#x27;,&#x27; + &#x27;&quot;displayName&quot; : &quot;&#x27; + gridnameJsonLists[j].gridname + &#x27;&quot;}&#x27; 
+                        vm.gridOptions.columnDefs.push(JSON.parse(str)); 
+                };
             };
 
          * 6. СКРЫВАЕМ ПОЛЕ ЕСЛИ ОНО ПРИСУТСТВУЕТ В МАССИВЕ notVisible ДЛЯ ОСТАЛЬНЫХ - ПЕРЕИМЕНОВЫВАЕМ ПОЛЯ ГРИДА
             
+            let notVisible = [&#x27;id&#x27;];//&#x27;id_list&#x27;
+
+            //СКРЫВАЕМ ПОЛЕ ЕСЛИ ОНО ПРИСУТСТВУЕТ В МАССИВЕ notVisible ДЛЯ ОСТАЛЬНЫХ - ПЕРЕИМЕНОВЫВАЕМ ПОЛЯ ГРИДА
             for(let j=0; j &lt; notVisible.length; j++){
-                for(let i=0; i &lt; vm.ngGridView.columnDefs.length; i++){
-                    if(vm.ngGridView.columnDefs[i].field == notVisible[j]){
-                        vm.ngGridView.columnDefs[i].visible = false;
+                for(let i=0; i &lt; vm.gridOptions.columnDefs.length; i++){
+                    if(vm.gridOptions.columnDefs[i].field == notVisible[j]){
+                        vm.gridOptions.columnDefs[i].visible = false;
                     }else{
                         //НАХОДИМ ПО id (j) ИНДЕКС ЗАДАЧИ В МАССИВЕ vm.resjsontasks
-                        let firstIndex = find_index_by_id(gridnameJsonLists, vm.ngGridView.columnDefs[i].field);
-                        vm.ngGridView.columnDefs[i].displayName = gridnameJsonLists[firstIndex].gridname;
-                        vm.ngGridView.columnDefs[i].width = gridnameJsonLists[firstIndex].width;
+                        let firstIndex = find_index_by_id(gridnameJsonLists, vm.gridOptions.columnDefs[i].field);
+                        vm.gridOptions.columnDefs[i].displayName = gridnameJsonLists[firstIndex].gridname;
+                        vm.gridOptions.columnDefs[i].width = gridnameJsonLists[firstIndex].width;
                     }
                 }
             };
 
          * 7. ДОБАВЛЯЕМ КНОПКИ РЕДАКТИРОВАНИЯ И УДАЛЕНИЯ
+         * 8. ДОБАВЛЯЕММ ФИЛЬТРЫ  И ОТМЕНЯЕМ ФИЛЬТРЫ ДЛЯ КНОПОК
+
+            for(let j=0; j &lt; vm.gridOptions.columnDefs.length; j++){
+                
+                if(vm.gridOptions.columnDefs[j].field == &quot;id_list&quot; || vm.gridOptions.columnDefs[j].field == &quot;execution_status&quot;){
+                    if(vm.gridOptions.columnDefs[j].field == &quot;id_list&quot;) {
+                        myFilter = myList
+                    } else  {
+                        myFilter = myStatus
+                    }
+
+                    str = &#x27;{&#x27; 
+                        + &#x27;&quot;type&quot; : &quot;select&quot;,&#x27; 
+                        + &#x27;&quot;selectOptions&quot;  : [ &#x27;
+                        + myFilter 
+                    + &#x27;]}&#x27;
+
+                    vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
+
+                    if(vm.gridOptions.columnDefs[j].field == &quot;id_list&quot;) {
+                        vm.gridOptions.columnDefs[j].cellFilter = &#x27;id_list&#x27;;
+                    }else{
+                        vm.gridOptions.columnDefs[j].cellFilter = &#x27;execution_status&#x27;;
+                    }
+
+                };
+
+                if(vm.gridOptions.columnDefs[j].field == &quot;edit&quot; || vm.gridOptions.columnDefs[j].field == &quot;delete&quot;) vm.gridOptions.columnDefs[j].enableFiltering = false;
+                if(vm.gridOptions.columnDefs[j].field == &quot;id_user&quot;) {
+                    vm.gridOptions.columnDefs[j].cellFilter = &#x27;id_user&#x27;;
+                    
+                    let dropDown;
+
+                    if(vm.user.id == 1) {
+                        vm.allUsers.map(item =&gt; dropDown = dropDown + &#x27;{&quot;value&quot;: &quot;&#x27; + item.id + &#x27;&quot;, &quot;label&quot;: &quot;&#x27; + item.username + &#x27;&quot; },&#x27;);
+                    }else{
+                        vm.allUsers.map(item =&gt; {
+                            if(item.id == vm.user.id) {
+                                dropDown = dropDown + &#x27;{&quot;value&quot;: &quot;&#x27; + item.id + &#x27;&quot;, &quot;label&quot;: &quot;&#x27; + item.username + &#x27;&quot; },&#x27;
+                            }
+                        })
+                    }
+                    
+                    str = &#x27;{&#x27; 
+                        + &#x27;&quot;type&quot; : &quot;select&quot;,&#x27; 
+                        + &#x27;&quot;selectOptions&quot;  :  [&#x27;
+                        + dropDown.slice(9,-1) 
+                    + &#x27;]}&#x27;;
+
+                    vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
+                }
+            };
+
          * @method initGrid
          */
         //ФУНКЦИЯ СОЗДАНИЯ ГРИДА
         function initGrid() {
-        
-            vm.ngGridView = {
-                data: &#x27;vm.resjsontasks&#x27;,
-                showSelectionCheckbox: true, // ОБЩИЙ ЧЕКБОК
-                showFooter: true, // итого
-                enableColumnResize: true,
-
-                enableCellSelection: false,
-                enableRowSelection: true,           
-                enableCellEdit: false, //true (если скрыти КОРНЕВЫЕ ПОЛЯ!!!) false
-                
-                headerRowHeight: 65,
-                showFilter: true,
-                filterOptions: vm.filterOptions,
+            vm.gridOptions = {
+                enableCellEdit: false,
+                enableColumnResizing: true,
+                enableFiltering: true,
+                showGridFooter:true,
+                onRegisterApi: function(gridApi){
+                  vm.gridApi = gridApi;
+                },
                 columnDefs: []
-            };
-
-            vm.filterOptions = {
-                filterText: &quot;&quot;,
-                useExternalFilter: true
             };
 
             let str;
 
-            /*ДОБАВЛЯЕМ ЧЕКБОКС
-            let che1 = &#x27;&lt;div class=\&#x27;ngSelectionCell\&#x27;&gt;&lt;input tabindex=\&#x27;-1\&#x27; class=\&#x27;ngSelectionCheckbox\&#x27; type=\&#x27;checkbox\&#x27; ng-click=\&#x27;vm.my_alert(row.entity.id,row.entity.id_list)\&#x27; ng-checked=\&#x27;row.selected\&#x27; /&gt; Some text here&lt;/div&gt;&quot;&#x27;;
-            str =&#x27;{&quot;field&quot;: &quot;dude&quot;, &quot;displayName&quot;: &quot;N&quot;, &quot;cellClass&quot;: &quot;grid-align&quot;, &quot;width&quot;: 140, &quot;cellTemplate&quot;: &quot;&#x27; + che1 + &#x27;}&#x27;
-            vm.ngGridView.columnDefs.push(JSON.parse(str));
-            */
-
-            vm.status = [
-                {id: 1, name:&#x27;Ожидает&#x27;},
-                {id: 2, name:&#x27;В работе&#x27;},
-                {id: 3, name:&#x27;Выполнено&#x27;},
-            ];
-
-            let myCelTemp;
-            let myCelTemp1 = &#x27;&lt;select disabled ng-cell-input &#x27;
-                                + &#x27;ng-options=\&#x27;s.id as s.name for s in vm.status\&#x27;&#x27;
-                                + &#x27;ng-class=\&#x27;colt\&#x27;&#x27;
-                                + &#x27;ng-model=\&#x27;COL_FIELD\&#x27;&#x27;
-                                + &#x27;ng-input=\&#x27;COL_FIELD\&#x27;&#x27;
-                                + &#x27;data-placeholder=\&#x27;-- Select One --\&#x27;&gt;&#x27;
-                            + &#x27;&lt;/select&gt;&#x27;
-
-
-            vm.dragndrop_list = [
-                {id: 1, name:&#x27;План&#x27;},
-                {id: 2, name:&#x27;В процессе&#x27;},
-                {id: 3, name:&#x27;Готово&#x27;},
-            ];
-
-            let myCelTemp2 = &#x27;&lt;select disabled ng-cell-input &#x27;
-                        + &#x27;ng-options=\&#x27;s.id as s.name for s in vm.dragndrop_list\&#x27;&#x27;
-                        + &#x27;ng-class=\&#x27;colt\&#x27;&#x27;
-                        + &#x27;ng-model=\&#x27;COL_FIELD\&#x27;&#x27;
-                        + &#x27;ng-input=\&#x27;COL_FIELD\&#x27;&#x27;
-                        + &#x27;data-placeholder=\&#x27;-- Select One --\&#x27;&gt;&#x27;
-                    + &#x27;&lt;/select&gt;&#x27;
-
-            /* СОРТИРУЕМ gridnameJsonLists ДЛЯ ОТОБРАЖЕНИЯ СТТОЛБЦОВ ЗАДАЧ В СООТВЕТСТВИЕ С
-            С ПОЛЕМ sort gridnameJsonLists */
+            /* СОРТИРУЕМ gridnameJsonLists ДЛЯ ОТОБРАЖЕНИЯ СТОЛБЦОВ ЗАДАЧ В СООТВЕТСТВИЕ С ПОЛЕМ sort gridnameJsonLists */
             let tt = gridnameJsonLists.sort((a,b) =&gt; a.sort - b.sort);
 
             /*ДЛЯ ОТОБРАЖЕНИЯ В ТАБЛИЦЕ СОЗДАЕМ &quot;СТРОКОВЫЙ ОБЪЕКТ&quot;- str
             И ПУШИМ ЕГО В columnDefs*/
             for(let j=0; j &lt; tt.length; j++){
                 if(tt[j].id != &quot;$$hashKey&quot;) {
-                    if(tt[j].id == &quot;execution_status&quot; || tt[j].id == &quot;id_list&quot;){
-                        if(tt[j].id == &quot;execution_status&quot;) {
-                            myCelTemp = myCelTemp1;
-                        }else{
-                            myCelTemp = myCelTemp2;
-                        };
-
-                        str = &#x27;{&quot;field&quot; : &quot;&#x27; + tt[j].id + &#x27;&quot;&#x27; + &#x27;,&#x27; + &#x27;&quot;cellTemplate&quot; : &quot;&#x27; + myCelTemp + &#x27;&quot;}&#x27; //&#x27; + &#x27;&quot;enableFiltering&quot; : &#x27; + false + 
-                        vm.ngGridView.columnDefs.push(JSON.parse(str)); 
-                    }else{
-                        str = &#x27;{&quot;field&quot; : &quot;&#x27; + tt[j].id + &#x27;&quot;&#x27; + &#x27;,&#x27; + &#x27;&quot;displayName&quot; : &quot;&#x27; + gridnameJsonLists[j].id + &#x27;&quot;}&#x27; //&#x27; + &#x27;&quot;enableFiltering&quot; : &#x27; + false + 
-                        vm.ngGridView.columnDefs.push(JSON.parse(str));  
-                    }
-                }
+                        str = &#x27;{&quot;field&quot; : &quot;&#x27; + tt[j].id + &#x27;&quot;&#x27; + &#x27;,&#x27; + &#x27;&quot;displayName&quot; : &quot;&#x27; + gridnameJsonLists[j].gridname + &#x27;&quot;}&#x27; 
+                        vm.gridOptions.columnDefs.push(JSON.parse(str)); 
+                };
             };
 
             let notVisible = [&#x27;id&#x27;];//&#x27;id_list&#x27;
 
-            //СКРЫВАЕМ ПОЛЕ ЕСЛИ ОНО ПРИСУТСТВУЕТ В МАССИВЕ notVisible
-            //ДЛЯ ОСТАЛЬНЫХ - ПЕРЕИМЕНОВЫВАЕМ ПОЛЯ ГРИДА
+            //СКРЫВАЕМ ПОЛЕ ЕСЛИ ОНО ПРИСУТСТВУЕТ В МАССИВЕ notVisible ДЛЯ ОСТАЛЬНЫХ - ПЕРЕИМЕНОВЫВАЕМ ПОЛЯ ГРИДА
             for(let j=0; j &lt; notVisible.length; j++){
-                for(let i=0; i &lt; vm.ngGridView.columnDefs.length; i++){
-                    if(vm.ngGridView.columnDefs[i].field == notVisible[j]){
-                        vm.ngGridView.columnDefs[i].visible = false;
+                for(let i=0; i &lt; vm.gridOptions.columnDefs.length; i++){
+                    if(vm.gridOptions.columnDefs[i].field == notVisible[j]){
+                        vm.gridOptions.columnDefs[i].visible = false;
                     }else{
                         //НАХОДИМ ПО id (j) ИНДЕКС ЗАДАЧИ В МАССИВЕ vm.resjsontasks
-                        let firstIndex = find_index_by_id(gridnameJsonLists, vm.ngGridView.columnDefs[i].field);
-                        vm.ngGridView.columnDefs[i].displayName = gridnameJsonLists[firstIndex].gridname;
-                        vm.ngGridView.columnDefs[i].width = gridnameJsonLists[firstIndex].width;
+                        let firstIndex = find_index_by_id(gridnameJsonLists, vm.gridOptions.columnDefs[i].field);
+                        vm.gridOptions.columnDefs[i].displayName = gridnameJsonLists[firstIndex].gridname;
+                        vm.gridOptions.columnDefs[i].width = gridnameJsonLists[firstIndex].width;
                     }
                 }
             };
 
             /*ДОБАВЛЯЕМ КНОПКУ РЕДАКТИРОВАНИЯ*/
-            let che = &#x27;&lt;i class=\&#x27;fa fa-pencil-square-o btn btn-success btn-sm\&#x27; ng-click=\&#x27;vm.my_alert(row.entity.id,row.entity.id_list,1)\&#x27;&gt;&lt;/i&gt;&quot;&#x27;;
-            str =&#x27;{&quot;field&quot;: &quot;edit&quot;, &quot;displayName&quot;: &quot;...&quot;, &quot;width&quot;: 40, &quot;cellTemplate&quot;: &quot;&#x27; + che + &#x27;}&#x27;
+            let che = &#x27;&lt;i class=\&#x27;fa fa-pencil-square-o btn btn-success btn-sm\&#x27; ng-click=\&#x27;grid.appScope.vm.my_alert(row.entity.id,row.entity.id_list,1)\&#x27;&gt;&lt;/i&gt;&quot;&#x27;;
+            str =&#x27;{&quot;field&quot;: &quot;edit&quot;, &quot;enableSorting&quot;: false, &quot;displayName&quot;: &quot;...&quot;, &quot;width&quot;: 38, &quot;cellTemplate&quot;: &quot;&#x27; + che + &#x27;}&#x27;
             // console.log(str); 
-            vm.ngGridView.columnDefs.push(JSON.parse(str));
-
-            // /*ДОБАВЛЯЕМ КНОПКУ ДОБАВЛЕНИЯ*/
-            // let che2 = &#x27;&lt;div &gt;&lt;input tabindex=\&#x27;-1\&#x27; type=\&#x27;button\&#x27; class=\&#x27;btn btn-success btn-sm\&#x27; value=\&#x27;add\&#x27; ng-click=\&#x27;vm.my_alert(row.entity.id,row.entity.id_list)\&#x27; ng-checked=\&#x27;row.selected\&#x27; /&gt;&lt;/div&gt;&quot;&#x27;;
-            // str =&#x27;{&quot;field&quot;: &quot;add&quot;, &quot;displayName&quot;: &quot;add&quot;, &quot;width&quot;: 50, &quot;cellTemplate&quot;: &quot;&#x27; + che2 + &#x27;}&#x27;
-            // // console.log(str); 
-            // vm.ngGridView.columnDefs.push(JSON.parse(str));
+            vm.gridOptions.columnDefs.push(JSON.parse(str));
 
             /*ДОБАВЛЯЕМ КНОПКУ УДАЛЕНИЯ*/
-            che = &#x27;&lt;div&gt;&lt;i class=\&#x27;fa fa-trash-o btn btn-danger btn-sm\&#x27; ng-click=\&#x27;vm.my_alert(row.entity.id,row.entity.id_list,0)\&#x27;&gt;&lt;/i&gt;&lt;/div&gt;&quot;&#x27;;
-            str =&#x27;{&quot;field&quot;: &quot;delete&quot;, &quot;displayName&quot;: &quot;...&quot;, &quot;width&quot;: 40, &quot;cellTemplate&quot;: &quot;&#x27; + che + &#x27;}&#x27;
-            vm.ngGridView.columnDefs.push(JSON.parse(str));
+            che = &#x27;&lt;div&gt;&lt;i class=\&#x27;fa fa-trash-o btn btn-danger btn-sm\&#x27; ng-click=\&#x27;grid.appScope.vm.my_alert(row.entity.id,row.entity.id_list,0)\&#x27;&gt;&lt;/div&gt;&quot;&#x27;;
+            str =&#x27;{&quot;field&quot;: &quot;delete&quot;, &quot;enableSorting&quot;: false, &quot;displayName&quot;: &quot;...&quot;, &quot;width&quot;: 38, &quot;cellTemplate&quot;: &quot;&#x27; + che + &#x27;}&#x27;
+            vm.gridOptions.columnDefs.push(JSON.parse(str));
+
+
+            let myList = &#x27;{&quot;value&quot;: &quot;1&quot;, &quot;label&quot;: &quot;План&quot; }, { &quot;value&quot;: &quot;2&quot;, &quot;label&quot;: &quot;В процессе&quot; }, { &quot;value&quot;: &quot;3&quot;, &quot;label&quot;: &quot;Готово&quot;}&#x27;
+            let myStatus = &#x27;{&quot;value&quot;: &quot;1&quot;, &quot;label&quot;: &quot;Ожидает&quot; }, { &quot;value&quot;: &quot;2&quot;, &quot;label&quot;: &quot;В работе&quot; }, { &quot;value&quot;: &quot;3&quot;, &quot;label&quot;: &quot;Выполнено&quot;}&#x27;
+            let myFilter;
+
+            //ДОБАВЛЯЕММ ФИЛЬТРЫ  И ОТМЕНЯЕМ ФИЛЬТРЫ ДЛЯ КНОПОК
+            for(let j=0; j &lt; vm.gridOptions.columnDefs.length; j++){
+                
+                if(vm.gridOptions.columnDefs[j].field == &quot;id_list&quot; || vm.gridOptions.columnDefs[j].field == &quot;execution_status&quot;){
+                    if(vm.gridOptions.columnDefs[j].field == &quot;id_list&quot;) {
+                        myFilter = myList
+                    } else  {
+                        myFilter = myStatus
+                    }
+
+                    str = &#x27;{&#x27; 
+                        + &#x27;&quot;type&quot; : &quot;select&quot;,&#x27; 
+                        + &#x27;&quot;selectOptions&quot;  : [ &#x27;
+                        + myFilter 
+                    + &#x27;]}&#x27;
+
+                    vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
+
+                    if(vm.gridOptions.columnDefs[j].field == &quot;id_list&quot;) {
+                        vm.gridOptions.columnDefs[j].cellFilter = &#x27;id_list&#x27;;
+                    }else{
+                        vm.gridOptions.columnDefs[j].cellFilter = &#x27;execution_status&#x27;;
+                    }
+
+                };
+
+                if(vm.gridOptions.columnDefs[j].field == &quot;edit&quot; || vm.gridOptions.columnDefs[j].field == &quot;delete&quot;) vm.gridOptions.columnDefs[j].enableFiltering = false;
+                if(vm.gridOptions.columnDefs[j].field == &quot;id_user&quot;) {
+                    vm.gridOptions.columnDefs[j].cellFilter = &#x27;id_user&#x27;;
+                    
+                    let dropDown;
+
+                    if(vm.user.id == 1) {
+                        vm.allUsers.map(item =&gt; dropDown = dropDown + &#x27;{&quot;value&quot;: &quot;&#x27; + item.id + &#x27;&quot;, &quot;label&quot;: &quot;&#x27; + item.username + &#x27;&quot; },&#x27;);
+                    }else{
+                        vm.allUsers.map(item =&gt; {
+                            if(item.id == vm.user.id) {
+                                dropDown = dropDown + &#x27;{&quot;value&quot;: &quot;&#x27; + item.id + &#x27;&quot;, &quot;label&quot;: &quot;&#x27; + item.username + &#x27;&quot; },&#x27;
+                            }
+                        })
+                    }
+                    
+                    str = &#x27;{&#x27; 
+                        + &#x27;&quot;type&quot; : &quot;select&quot;,&#x27; 
+                        + &#x27;&quot;selectOptions&quot;  :  [&#x27;
+                        + dropDown.slice(9,-1) 
+                    + &#x27;]}&#x27;;
+
+                    vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
+                }
+            };
+
+            refresh_grid();
+        };
+
+        vm.getProductList = function() {
+            vm.gridOptions.data = vm.resultSimulatedData;
+            vm.mySelectedRows = vm.gridApi.selection.getSelectedRows(); //&lt;--Property undefined error here
+
+            if (vm.mySelectedRows[0]) {
+                let al;
+                for(let i=0; i &lt; vm.mySelectedRows.length; i++){
+                    al = al +&#x27;Выбрано : &#x27; + (i + 1) + &#x27; ИД = &#x27; + vm.mySelectedRows[i].id + &#x27;, Лист = &#x27; + vm.mySelectedRows[i].id_list + &#x27;.\n&#x27;
+                }
+                alert(al.slice(9));
+            } else {
+                alert(&#x27;Ничего не выбрано&#x27;);
+            }
+
+            $timeout(function() {
+              if (vm.gridApi.selection.selectedRow) {
+                  vm.gridApi.selection.selectRow(vm.gridOptions.data[0]);
+              }
+            });
         };
 
         function my_alert (id, l, type=&#x27;def&#x27;) {
+            // console.log(vm.allUsers);
             if(type == 0) {
                 deltasck (l, id);
             }
@@ -523,12 +653,26 @@
             event.preventDefault();
             // vm[&#x27;list_&#x27; + i].splice(j, 1);
             vm[&#x27;list_&#x27; + i].splice(_.indexOf(vm[&#x27;list_&#x27; + i], _.find(vm[&#x27;list_&#x27; + i], function (item) { return item.id === j; })), 1);
-            vm.resjsontasks.splice(_.indexOf(vm.resjsontasks, _.find(vm.resjsontasks, function (item) { return item.id === j; })), 1);
+            
+            if(vm.user.id != 1) {
+                vm.resjsontasks.splice(_.indexOf(vm.resjsontasks, _.find(vm.resjsontasks, function (item) { return item.id === j; })), 1);
+                vm.gridOptions.data = vm.resjsontasks.filter(item =&gt; item.id_user == vm.user.id);
+            }else{
+                vm.resjsontasks.splice(_.indexOf(vm.resjsontasks, _.find(vm.resjsontasks, function (item) { return item.id === j; })), 1);
+            }
         };
 
         function refresh_rawScreens(){
             vm.rawScreens = [];
             createSheets(vm.resgetJsonLists);
+        };
+
+        function refresh_grid(){
+            if(vm.user.id != 1) {
+                vm.gridOptions.data = vm.resjsontasks.filter(item =&gt; item.id_user == vm.user.id);
+            }else{
+                vm.gridOptions.data = vm.resjsontasks
+            }
         };
 
         var tasck_count = 0;
@@ -537,13 +681,14 @@
          * @description ФУНКЦИОНАЛ addtasck (i):&lt;br&gt;
          * 1. ФОРМИРУЕТ ИЗ СТРОКИ ОБЪЕКТ-ЗАДАЧУ&lt;br&gt; 
          * 2. ДОБАВЛЯЕТ ОБЪЕКТ В vm.resjsontasks &lt;br&gt;
-         * 3. ОБНОВЛЯЕТ vm.rawScreens
+         * 3. ОБНОВЛЯЕТ vm.rawScreens И ГРИД
          * @method addtasck
          * @param {Integer} i НОМЕР ЛИСТА DRAG&amp;DROP
          */ 
         //ФУНКЦИЯ ДОБАВЛЕНИЯ ЗАДАЧИ 
         function addtasck (i) {
             event.preventDefault();
+
             if(vm[&#x27;list_&#x27; + i].length &lt; vm.tasck_limit){
                 var addTasck = vm.resjsontasks[0];
 
@@ -555,7 +700,9 @@
                             str = str + &#x27;&quot;&#x27; + k + &#x27;&quot;&#x27;  + &#x27;: &quot;NewTasck &#x27; + i + tasck_count + &#x27;&quot;,&#x27;
                         }else{
                             if(k == &quot;id_list&quot;){
-                                str = str + &#x27;&quot;&#x27; + k + &#x27;&quot;&#x27;  + &#x27;: &#x27; +  Number(i) 
+                                str = str + &#x27;&quot;&#x27; + k + &#x27;&quot;&#x27;  + &#x27;: &#x27; +  Number(i) + &#x27;,&#x27;
+                            }else if(k == &quot;id_user&quot;){
+                                str = str + &#x27;&quot;&#x27; + k + &#x27;&quot;&#x27;  + &#x27;: &#x27; +  vm.user.id + &#x27;,&#x27;
                             }else if(k == &quot;description&quot; || k == &quot;date&quot;){ 
                                 if(k == &quot;date&quot;){
                                     str = str + &#x27;&quot;&#x27; + k + &#x27;&quot;&#x27; + &#x27; : &quot;08.12.2017&quot;&#x27; + &#x27;,&#x27;
@@ -568,13 +715,15 @@
                        str = str + &#x27;&quot;id&quot; : &#x27; + Math.floor(Date.now() / 1000) + &#x27;,&#x27; 
                     }
                 };
+                str = str.slice(0,-1)
                 str = str + &#x27;}&#x27;;
-                // vm.rawScreens.push(JSON.parse(str));
-                // vm[&#x27;list_&#x27; + i].push(JSON.parse(str));
+
                 vm.resjsontasks.push(JSON.parse(str));
 
                 refresh_rawScreens();
-                
+
+                refresh_grid();
+
                 tasck_count++
             }
         };
@@ -594,7 +743,9 @@
             let f = _.find(vm[&#x27;list_&#x27; + i], function (item){ return item.id === j;});
 
             //ВСЕ &quot;КЛЮЧИ&quot; С ДАННЫМИ ЗАГОНЯЕМ В ПЕРЕМЕННЫЕ ФОРМЫ
-            for(let k in f) vm[&#x27;html_&#x27; + k] = f[k];
+            for(let k in f) {
+                vm[&#x27;html_&#x27; + k] = f[k];
+            };
             vm[&#x27;html_t_index&#x27;] = t_index + 1;
 
             //ОТКРЫВАЕММ ДИАЛОГОВОЕ ОКНО
@@ -608,7 +759,6 @@
         /**
          * @description ФУНКЦИОНАЛ find_index_by_id(source, id) :&lt;br&gt;
          * ПОИСК ИНДЕКСА ЗАДАЧИ В МАССИВЕ ПЕРЕДАННОГО ОБЪЕКТА - source ПО ПЕРЕДАННОМУ id
-
                 function find_index_by_id(source,id){
                     let indexes = $.map(source, function(obj, index) {
                             if(obj.id == id) {
@@ -617,7 +767,6 @@
                         }) 
                     return indexes[0];
                 };
-
          * @method find_index_by_id
          * @param {Object} source МАССИВ ОБЪЕКТОВ
          * @param {Integer} index id ЗАДАЧИ
@@ -669,6 +818,9 @@
                 if(vm.change == true){
                     // console.log(vm.change);
                     refresh_rawScreens();
+
+                    refresh_grid();
+
                     vm.change = false;
                     // console.log(vm.change);              
                 };
@@ -713,6 +865,7 @@
             UserService.GetAll()
                 .then(function (users) {
                     vm.allUsers = users;
+                    JsonService.Users = vm.allUsers;
                 });
         };
 
@@ -725,6 +878,60 @@
         };
 
     };
+
+    /*===================ФИЛЬТРЫ ДЛЯ ЗАМЕНЫ ДАННЫХ В ГРИДЕ===================*/
+
+    //КОНВЕРТАЦИЯ МАССИВА ОБЪЕКТОВ В ОБЪЕКТ ДЛЯ ФИЛЬТРОВ
+    function create_obj_for_filter(obj, obj_id, obj_field){
+        let objFilter = &#x27;{&#x27;;
+        for(let j=0; j &lt; obj.length; j++){
+            objFilter = objFilter + &#x27;&quot;&#x27; + obj[j][obj_id] + &#x27;&quot;&#x27; + &#x27;: &#x27; + &#x27;&quot;&#x27; + obj[j][obj_field] + &#x27;&quot;&#x27; + &#x27;, &#x27;
+        };
+
+        objFilter = objFilter.slice(0,-2) + &#x27;}&#x27;;
+        return JSON.parse(objFilter)
+    };
+
+
+    //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - id_list)
+    function id_list (JsonService){
+        var id_listHash = create_obj_for_filter(JsonService.list, &#x27;id&#x27;, &#x27;name&#x27;) 
+
+        return function(input) {
+            if (!input){
+              return &#x27;&#x27;;
+            } else {
+              return id_listHash[input];
+            }
+        };
+    };
+
+
+    //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - execution_status)
+    function execution_status(JsonService){
+        var execution_statusHash = JsonService.status;
+
+        return function(input) {
+            if (!input){
+              return &#x27;&#x27;;
+            } else {
+              return execution_statusHash[input];
+            }
+        };
+    };
+
+    //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - id_user)
+    function id_user(JsonService){
+        var id_usertHash = create_obj_for_filter(JsonService.Users, &#x27;id&#x27;, &#x27;username&#x27;)
+
+        return function(input) {
+            if (!input){
+              return &#x27;&#x27;;
+            } else {
+              return id_usertHash[input];
+            }
+        };
+    }
 
 })();
     </pre>

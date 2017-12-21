@@ -29,6 +29,7 @@
                     <div id="api-tabview" class="tabview">
                         <ul class="tabs">
                             <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-elements">Elements</a></li>
                             <li><a href="#api-modules">Modules</a></li>
                         </ul>
                 
@@ -50,6 +51,13 @@
                                 <li><a href="../classes/ServiceUserlocalStorage.html">ServiceUserlocalStorage</a></li>
                             </ul>
                 
+                                <ul id="api-elements" class="apis elements">
+                                    <li><a href="../elements/ANY.html">&lt;ANY&gt;</a></li>
+                                    <li><a href="../elements/div.html">&lt;div&gt;</a></li>
+                                    <li><a href="../elements/img.html">&lt;img&gt;</a></li>
+                                    <li><a href="../elements/input.html">&lt;input&gt;</a></li>
+                                    <li><a href="../elements/style.html">&lt;style&gt;</a></li>
+                                </ul>
                 
                             <ul id="api-modules" class="apis modules">
                                 <li><a href="../modules/app.html">app</a></li>
@@ -108,7 +116,7 @@
 </ol>
 <p>ТОЧКА ВХОДА - ФАЙЛ frontend/js/app.js (самовызывающаяся функция).</p>
 <pre class="code prettyprint"><code>   angular
-       .module('app',  ['ngGrid', 'ngRoute', 'ngCookies', 'ui.sortable'])
+       .module('app',  ['ui.grid', 'ui.grid.selection', 'ngRoute', 'ngCookies', 'ui.sortable'])
        .config(config)
        .run(run);</code></pre>
 
@@ -116,7 +124,7 @@
 
 
 <div class="yui3-g">
-    <div class="yui3-u-1-2">
+    <div class="yui3-u-1-3">
             <p>This module provides the following classes:</p>
 
             <ul class="module-classes">
@@ -173,8 +181,39 @@
             </ul>
     </div>
 
+    <div class="yui3-u-1-3">
+        <p>This module provides the following elements:</p>
 
-    <div class="yui3-u-1-2">
+        <ul class="module-elements">
+            <li class="module-element">
+                <a href="../elements/ANY.html">
+                    &lt;ANY&gt;
+                </a>
+            </li>
+            <li class="module-element">
+                <a href="../elements/div.html">
+                    &lt;div&gt;
+                </a>
+            </li>
+            <li class="module-element">
+                <a href="../elements/img.html">
+                    &lt;img&gt;
+                </a>
+            </li>
+            <li class="module-element">
+                <a href="../elements/input.html">
+                    &lt;input&gt;
+                </a>
+            </li>
+            <li class="module-element">
+                <a href="../elements/style.html">
+                    &lt;style&gt;
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="yui3-u-1-3">
     </div>
 </div>
                     </div>

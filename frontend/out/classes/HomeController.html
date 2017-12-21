@@ -29,6 +29,7 @@
                     <div id="api-tabview" class="tabview">
                         <ul class="tabs">
                             <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-elements">Elements</a></li>
                             <li><a href="#api-modules">Modules</a></li>
                         </ul>
                 
@@ -50,6 +51,13 @@
                                 <li><a href="../classes/ServiceUserlocalStorage.html">ServiceUserlocalStorage</a></li>
                             </ul>
                 
+                                <ul id="api-elements" class="apis elements">
+                                    <li><a href="../elements/ANY.html">&lt;ANY&gt;</a></li>
+                                    <li><a href="../elements/div.html">&lt;div&gt;</a></li>
+                                    <li><a href="../elements/img.html">&lt;img&gt;</a></li>
+                                    <li><a href="../elements/input.html">&lt;input&gt;</a></li>
+                                    <li><a href="../elements/style.html">&lt;style&gt;</a></li>
+                                </ul>
                 
                             <ul id="api-modules" class="apis modules">
                                 <li><a href="../modules/app.html">app</a></li>
@@ -91,7 +99,7 @@
 
 
         <div class="foundat">
-            Defined in: <a href="../files/assets_home_home.controller.js.html#l8"><code>assets\home\home.controller.js:8</code></a>
+            Defined in: <a href="../files/assets_home_home.controller.js.html#l11"><code>assets\home\home.controller.js:11</code></a>
         </div>
 
             Module: <a href="../modules/app.html">app</a>
@@ -101,8 +109,16 @@
 
 <div class="box intro">
     <p>ПРЕДОСТАВЛЕНИЕ ДАННЫХ В ВИДЕ DRAG&amp;DROP И ng-GRID</p>
-<pre class="code prettyprint"><code>       HomeController.$inject = ['UserService', 'JsonService', '$rootScope'];
-       ........</code></pre>
+<pre class="code prettyprint"><code>       (function () {
+           angular
+               .module('app')
+               .controller('HomeController', HomeController)
+               .filter('id_list', id_list)
+               .filter('execution_status', execution_status)
+               .filter('id_user', id_user)
+
+            HomeController.$inject = ['UserService', 'JsonService', 'uiGridConstants','$rootScope', '$timeout'];
+           ........</code></pre>
 
 </div>
 
@@ -193,7 +209,7 @@
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/assets_home_home.controller.js.html#l444"><code>assets\home\home.controller.js:444</code></a>
+        <a href="../files/assets_home_home.controller.js.html#l580"><code>assets\home\home.controller.js:580</code></a>
         </p>
 
 
@@ -205,7 +221,7 @@
 <ol>
 <li>ФОРМИРУЕТ ИЗ СТРОКИ ОБЪЕКТ-ЗАДАЧУ<br></li>
 <li>ДОБАВЛЯЕТ ОБЪЕКТ В vm.resjsontasks <br></li>
-<li>ОБНОВЛЯЕТ vm.rawScreens</li>
+<li>ОБНОВЛЯЕТ vm.rawScreens И ГРИД</li>
 </ol>
 
     </div>
@@ -252,7 +268,7 @@
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/assets_home_home.controller.js.html#l212"><code>assets\home\home.controller.js:212</code></a>
+        <a href="../files/assets_home_home.controller.js.html#l241"><code>assets\home\home.controller.js:241</code></a>
         </p>
 
 
@@ -263,12 +279,30 @@
         <p>ФУНКЦИОНАЛ createSheets (resgetJsonLists):<br>
 ЦИКЛОМ СОЗДАЮТСЯ ЛИСТЫ. ЛИСТАМ ПРИСВАИВАЕТСЯ ИМЯ И ID<br> СОЗДАННЫЕ ЛИСТЫ ДОБАВЛЯЮТСЯ В МАССИВ vm.rawScreens</p>
 <pre class="code prettyprint"><code>           function createSheets(resgetJsonLists){
-               for(let i=0; i &lt; resgetJsonLists.length; i++){
-                   vm['list_' + resgetJsonLists[i].id] = makeList(resgetJsonLists[i].id);
-                   vm['list_' + resgetJsonLists[i].id].name = resgetJsonLists[i].name;
-                   vm.rawScreens.push(vm['list_' + resgetJsonLists[i].id]);
-               };
-           };</code></pre>
+               if(!curUser){
+                   UserService.GetByUsername($rootScope.globals.currentUser.username)
+                   .then(function (user) {
+                       // console.log('user', user);
+                       vm.user = user;
+                       for(let i=0; i &lt; resgetJsonLists.length; i++){
+                           vm['list_' + resgetJsonLists[i].id] = makeList(resgetJsonLists[i].id);
+                           vm['list_' + resgetJsonLists[i].id].name = resgetJsonLists[i].name;
+                           vm.rawScreens.push(vm['list_' + resgetJsonLists[i].id]);
+                       };
+                       curUser = true;
+                       //СОЗДАЁМ ГРИД
+                       initGrid();
+                   });
+               }else{
+                   for(let i=0; i &lt; resgetJsonLists.length; i++){
+                       vm['list_' + resgetJsonLists[i].id] = makeList(resgetJsonLists[i].id);
+                       vm['list_' + resgetJsonLists[i].id].name = resgetJsonLists[i].name;
+                       vm.rawScreens.push(vm['list_' + resgetJsonLists[i].id]);
+                   };
+               }
+           };
+</code></pre>
+<p>ПРИ ПЕРВОМ ПРОХОДЕ СОЗДАЕМ ГРИД</p>
 
     </div>
 
@@ -320,7 +354,7 @@
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/assets_home_home.controller.js.html#l490"><code>assets\home\home.controller.js:490</code></a>
+        <a href="../files/assets_home_home.controller.js.html#l631"><code>assets\home\home.controller.js:631</code></a>
         </p>
 
 
@@ -403,7 +437,7 @@
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/assets_home_home.controller.js.html#l516"><code>assets\home\home.controller.js:516</code></a>
+        <a href="../files/assets_home_home.controller.js.html#l659"><code>assets\home\home.controller.js:659</code></a>
         </p>
 
 
@@ -412,15 +446,15 @@
 
     <div class="description">
         <p>ФУНКЦИОНАЛ find_index_by_id(source, id) :<br>
-ПОИСК ИНДЕКСА ЗАДАЧИ В МАССИВЕ ПЕРЕДАННОГО ОБЪЕКТА - source ПО ПЕРЕДАННОМУ id</p>
-<pre class="code prettyprint"><code>           function find_index_by_id(source,id){
-               let indexes = $.map(source, function(obj, index) {
-                       if(obj.id == id) {
-                           return index;
-                       }
-                   }) 
-               return indexes[0];
-           };</code></pre>
+ПОИСК ИНДЕКСА ЗАДАЧИ В МАССИВЕ ПЕРЕДАННОГО ОБЪЕКТА - source ПО ПЕРЕДАННОМУ id
+function find_index_by_id(source,id){
+let indexes = $.map(source, function(obj, index) {
+if(<a href="http://obj.id">obj.id</a> == id) {
+return index;
+}
+})
+return indexes[0];
+};</p>
 
     </div>
 
@@ -480,7 +514,7 @@
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/assets_home_home.controller.js.html#l236"><code>assets\home\home.controller.js:236</code></a>
+        <a href="../files/assets_home_home.controller.js.html#l298"><code>assets\home\home.controller.js:298</code></a>
         </p>
 
 
@@ -506,34 +540,26 @@
 <p>ДЛЯ ОТОБРАЖЕНИЯ В ТАБЛИЦЕ СОЗДАЕМ &quot;СТРОКОВЫЙ ОБЪЕКТ&quot;- str И ПУШИМ ЕГО В columnDefs</p>
 <pre class="code prettyprint"><code>    for(let j=0; j &lt; tt.length; j++){
         if(tt[j].id != &quot;$$hashKey&quot;) {
-            if(tt[j].id == &quot;execution_status&quot; || tt[j].id == &quot;id_list&quot;){
-                if(tt[j].id == &quot;execution_status&quot;) {
-                    myCelTemp = myCelTemp1;
-                }else{
-                    myCelTemp = myCelTemp2;
-                };
-
-                str = '{&quot;field&quot; : &quot;' + tt[j].id + '&quot;' + ',' + '&quot;cellTemplate&quot; : &quot;' + myCelTemp + '&quot;}' //' + '&quot;enableFiltering&quot; : ' + false + 
-                vm.ngGridView.columnDefs.push(JSON.parse(str)); 
-            }else{
-                str = '{&quot;field&quot; : &quot;' + tt[j].id + '&quot;' + ',' + '&quot;displayName&quot; : &quot;' + gridnameJsonLists[j].id + '&quot;}' //' + '&quot;enableFiltering&quot; : ' + false + 
-                vm.ngGridView.columnDefs.push(JSON.parse(str)); 
-            }
-        }
+                str = '{&quot;field&quot; : &quot;' + tt[j].id + '&quot;' + ',' + '&quot;displayName&quot; : &quot;' + gridnameJsonLists[j].gridname + '&quot;}' 
+                vm.gridOptions.columnDefs.push(JSON.parse(str)); 
+        };
     };
 </code></pre>
 </li>
 <li>
 <p>СКРЫВАЕМ ПОЛЕ ЕСЛИ ОНО ПРИСУТСТВУЕТ В МАССИВЕ notVisible ДЛЯ ОСТАЛЬНЫХ - ПЕРЕИМЕНОВЫВАЕМ ПОЛЯ ГРИДА</p>
-<pre class="code prettyprint"><code>    for(let j=0; j &lt; notVisible.length; j++){
-        for(let i=0; i &lt; vm.ngGridView.columnDefs.length; i++){
-            if(vm.ngGridView.columnDefs[i].field == notVisible[j]){
-                vm.ngGridView.columnDefs[i].visible = false;
+<pre class="code prettyprint"><code>    let notVisible = ['id'];//'id_list'
+
+    //СКРЫВАЕМ ПОЛЕ ЕСЛИ ОНО ПРИСУТСТВУЕТ В МАССИВЕ notVisible ДЛЯ ОСТАЛЬНЫХ - ПЕРЕИМЕНОВЫВАЕМ ПОЛЯ ГРИДА
+    for(let j=0; j &lt; notVisible.length; j++){
+        for(let i=0; i &lt; vm.gridOptions.columnDefs.length; i++){
+            if(vm.gridOptions.columnDefs[i].field == notVisible[j]){
+                vm.gridOptions.columnDefs[i].visible = false;
             }else{
                 //НАХОДИМ ПО id (j) ИНДЕКС ЗАДАЧИ В МАССИВЕ vm.resjsontasks
-                let firstIndex = find_index_by_id(gridnameJsonLists, vm.ngGridView.columnDefs[i].field);
-                vm.ngGridView.columnDefs[i].displayName = gridnameJsonLists[firstIndex].gridname;
-                vm.ngGridView.columnDefs[i].width = gridnameJsonLists[firstIndex].width;
+                let firstIndex = find_index_by_id(gridnameJsonLists, vm.gridOptions.columnDefs[i].field);
+                vm.gridOptions.columnDefs[i].displayName = gridnameJsonLists[firstIndex].gridname;
+                vm.gridOptions.columnDefs[i].width = gridnameJsonLists[firstIndex].width;
             }
         }
     };
@@ -541,6 +567,59 @@
 </li>
 <li>
 <p>ДОБАВЛЯЕМ КНОПКИ РЕДАКТИРОВАНИЯ И УДАЛЕНИЯ</p>
+</li>
+<li>
+<p>ДОБАВЛЯЕММ ФИЛЬТРЫ  И ОТМЕНЯЕМ ФИЛЬТРЫ ДЛЯ КНОПОК</p>
+<pre class="code prettyprint"><code>    for(let j=0; j &lt; vm.gridOptions.columnDefs.length; j++){
+        
+        if(vm.gridOptions.columnDefs[j].field == &quot;id_list&quot; || vm.gridOptions.columnDefs[j].field == &quot;execution_status&quot;){
+            if(vm.gridOptions.columnDefs[j].field == &quot;id_list&quot;) {
+                myFilter = myList
+            } else  {
+                myFilter = myStatus
+            }
+
+            str = '{' 
+                + '&quot;type&quot; : &quot;select&quot;,' 
+                + '&quot;selectOptions&quot;  : [ '
+                + myFilter 
+            + ']}'
+
+            vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
+
+            if(vm.gridOptions.columnDefs[j].field == &quot;id_list&quot;) {
+                vm.gridOptions.columnDefs[j].cellFilter = 'id_list';
+            }else{
+                vm.gridOptions.columnDefs[j].cellFilter = 'execution_status';
+            }
+
+        };
+
+        if(vm.gridOptions.columnDefs[j].field == &quot;edit&quot; || vm.gridOptions.columnDefs[j].field == &quot;delete&quot;) vm.gridOptions.columnDefs[j].enableFiltering = false;
+        if(vm.gridOptions.columnDefs[j].field == &quot;id_user&quot;) {
+            vm.gridOptions.columnDefs[j].cellFilter = 'id_user';
+            
+            let dropDown;
+
+            if(vm.user.id == 1) {
+                vm.allUsers.map(item =&gt; dropDown = dropDown + '{&quot;value&quot;: &quot;' + item.id + '&quot;, &quot;label&quot;: &quot;' + item.username + '&quot; },');
+            }else{
+                vm.allUsers.map(item =&gt; {
+                    if(item.id == vm.user.id) {
+                        dropDown = dropDown + '{&quot;value&quot;: &quot;' + item.id + '&quot;, &quot;label&quot;: &quot;' + item.username + '&quot; },'
+                    }
+                })
+            }
+            
+            str = '{' 
+                + '&quot;type&quot; : &quot;select&quot;,' 
+                + '&quot;selectOptions&quot;  :  ['
+                + dropDown.slice(9,-1) 
+            + ']}';
+
+            vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
+        }
+    };</code></pre>
 </li>
 </ol>
 
@@ -574,7 +653,7 @@
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/assets_home_home.controller.js.html#l191"><code>assets\home\home.controller.js:191</code></a>
+        <a href="../files/assets_home_home.controller.js.html#l213"><code>assets\home\home.controller.js:213</code></a>
         </p>
 
 
@@ -583,10 +662,14 @@
 
     <div class="description">
         <p>ФУНКЦИОНАЛ makeList (id_list):<br>
-ВОЗВРАЩАЕТ ОТФИЛЬТРОВАННЫЙ ПО ПОЛЮ - id_list МАССИВ ЗАДАЧ<br></p>
+ВОЗВРАЩАЕТ ОТФИЛЬТРОВАННЫЙ ПО ПОЛЯМ: id_list/id_user МАССИВ ЗАДАЧ<br></p>
 <pre class="code prettyprint"><code>           function makeList (id_list) {
                var filter_resjsontasks = [];
-               filter_resjsontasks = vm.resjsontasks.filter(item =&gt; item.id_list == id_list);
+               if(vm.user.id != 1) {
+                   filter_resjsontasks = vm.resjsontasks.filter(item =&gt; item.id_list == id_list &amp;&amp; item.id_user == vm.user.id);
+               }else{
+                   filter_resjsontasks = vm.resjsontasks.filter(item =&gt; item.id_list == id_list);
+               }
                return filter_resjsontasks;
            };</code></pre>
 
@@ -637,7 +720,7 @@
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/assets_home_home.controller.js.html#l545"><code>assets\home\home.controller.js:545</code></a>
+        <a href="../files/assets_home_home.controller.js.html#l686"><code>assets\home\home.controller.js:686</code></a>
         </p>
 
 
@@ -676,7 +759,7 @@
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/assets_home_home.controller.js.html#l25"><code>assets\home\home.controller.js:25</code></a>
+        <a href="../files/assets_home_home.controller.js.html#l36"><code>assets\home\home.controller.js:36</code></a>
         </p>
 
 
@@ -684,10 +767,9 @@
 
     <div class="description">
         <p>ВСЕ ЧТО "ПРЕДАЕТСЯ"" В HTML</p>
-<pre class="code prettyprint"><code>       vm.tasck_limit = 15; //ОГРАНИЧИТЕЛЬ ЗАДАЧ В ЛИСТЕ
-       vm.ngGridView = null;
-
-       vm.user = null;
+           vm.tasck_limit = 15;
+           vm.ngGridView = null;
+<pre class="code prettyprint"><code>       vm.user = null;
        vm.allUsers = [];
        vm.deleteUser = deleteUser;
 
@@ -736,8 +818,18 @@
                })
              }
            }
-       };
-       $('#dtpckr').datepicker();</code></pre>
+       }; 
+
+       vm.status = [
+           {id: 1, name:'Ожидает'},
+           {id: 2, name:'В работе'},
+           {id: 3, name:'Выполнено'},
+       ];
+
+       $('#dtpckr').datepicker();
+
+       var gridnameJsonLists = [];
+       let curUser = false;</code></pre>
 
     </div>
 
