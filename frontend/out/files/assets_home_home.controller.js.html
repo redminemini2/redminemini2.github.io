@@ -29,7 +29,6 @@
                     <div id="api-tabview" class="tabview">
                         <ul class="tabs">
                             <li><a href="#api-classes">Classes</a></li>
-                            <li><a href="#api-elements">Elements</a></li>
                             <li><a href="#api-modules">Modules</a></li>
                         </ul>
                 
@@ -51,13 +50,6 @@
                                 <li><a href="../classes/ServiceUserlocalStorage.html">ServiceUserlocalStorage</a></li>
                             </ul>
                 
-                                <ul id="api-elements" class="apis elements">
-                                    <li><a href="../elements/ANY.html">&lt;ANY&gt;</a></li>
-                                    <li><a href="../elements/div.html">&lt;div&gt;</a></li>
-                                    <li><a href="../elements/img.html">&lt;img&gt;</a></li>
-                                    <li><a href="../elements/input.html">&lt;input&gt;</a></li>
-                                    <li><a href="../elements/style.html">&lt;style&gt;</a></li>
-                                </ul>
                 
                             <ul id="api-modules" class="apis modules">
                                 <li><a href="../modules/app.html">app</a></li>
@@ -106,10 +98,9 @@
         .controller(&#x27;HomeController&#x27;, HomeController)
         .filter(&#x27;id_list&#x27;, id_list)
         .filter(&#x27;execution_status&#x27;, execution_status)
-        .filter(&#x27;id_user&#x27;, id_user)
 
         /**
-        * ПРЕДОСТАВЛЕНИЕ ДАННЫХ В ВИДЕ DRAG&amp;DROP И ng-GRID
+         * ПРЕДОСТАВЛЕНИЕ ДАННЫХ В ВИДЕ DRAG&amp;DROP И ng-GRID
             
             (function () {
                 angular
@@ -117,16 +108,14 @@
                     .controller(&#x27;HomeController&#x27;, HomeController)
                     .filter(&#x27;id_list&#x27;, id_list)
                     .filter(&#x27;execution_status&#x27;, execution_status)
-                    .filter(&#x27;id_user&#x27;, id_user)
 
                  HomeController.$inject = [&#x27;UserService&#x27;, &#x27;JsonService&#x27;, &#x27;uiGridConstants&#x27;,&#x27;$rootScope&#x27;, &#x27;$timeout&#x27;];
                 ........
 
-        * @class HomeController
-        * @module app
-        * @main HomeController
-        */
-
+         * @class HomeController
+         * @module app
+         * @main HomeController
+         */
     HomeController.$inject = [&#x27;UserService&#x27;, &#x27;JsonService&#x27;, &#x27;uiGridConstants&#x27;,&#x27;$rootScope&#x27;, &#x27;$timeout&#x27;];
 
     function HomeController(UserService, JsonService, uiGridConstants, $rootScope, $timeout) {
@@ -264,6 +253,7 @@
             {id: 2, name:&#x27;В работе&#x27;},
             {id: 3, name:&#x27;Выполнено&#x27;},
         ];
+
     /*=====================================================================*/
         
         $(&#x27;#dtpckr&#x27;).datepicker();
@@ -570,29 +560,30 @@
                 };
 
                 if(vm.gridOptions.columnDefs[j].field == &quot;edit&quot; || vm.gridOptions.columnDefs[j].field == &quot;delete&quot;) vm.gridOptions.columnDefs[j].enableFiltering = false;
-                if(vm.gridOptions.columnDefs[j].field == &quot;id_user&quot;) {
-                    vm.gridOptions.columnDefs[j].cellFilter = &#x27;id_user&#x27;;
+                
+                // if(vm.gridOptions.columnDefs[j].field == &quot;id_user&quot;) {
+                //     vm.gridOptions.columnDefs[j].cellFilter = &#x27;id_user&#x27;;
                     
-                    let dropDown;
+                //     let dropDown;
 
-                    if(vm.user.id == 1) {
-                        vm.allUsers.map(item =&gt; dropDown = dropDown + &#x27;{&quot;value&quot;: &quot;&#x27; + item.id + &#x27;&quot;, &quot;label&quot;: &quot;&#x27; + item.username + &#x27;&quot; },&#x27;);
-                    }else{
-                        vm.allUsers.map(item =&gt; {
-                            if(item.id == vm.user.id) {
-                                dropDown = dropDown + &#x27;{&quot;value&quot;: &quot;&#x27; + item.id + &#x27;&quot;, &quot;label&quot;: &quot;&#x27; + item.username + &#x27;&quot; },&#x27;
-                            }
-                        })
-                    }
+                //     if(vm.user.id == 1) {
+                //         vm.allUsers.map(item =&gt; dropDown = dropDown + &#x27;{&quot;value&quot;: &quot;&#x27; + item.id + &#x27;&quot;, &quot;label&quot;: &quot;&#x27; + item.username + &#x27;&quot; },&#x27;);
+                //     }else{
+                //         vm.allUsers.map(item =&gt; {
+                //             if(item.id == vm.user.id) {
+                //                 dropDown = dropDown + &#x27;{&quot;value&quot;: &quot;&#x27; + item.id + &#x27;&quot;, &quot;label&quot;: &quot;&#x27; + item.username + &#x27;&quot; },&#x27;
+                //             }
+                //         })
+                //     }
                     
-                    str = &#x27;{&#x27; 
-                        + &#x27;&quot;type&quot; : &quot;select&quot;,&#x27; 
-                        + &#x27;&quot;selectOptions&quot;  :  [&#x27;
-                        + dropDown.slice(9,-1) 
-                    + &#x27;]}&#x27;;
+                //     str = &#x27;{&#x27; 
+                //         + &#x27;&quot;type&quot; : &quot;select&quot;,&#x27; 
+                //         + &#x27;&quot;selectOptions&quot;  :  [&#x27;
+                //         + dropDown.slice(9,-1) 
+                //     + &#x27;]}&#x27;;
 
-                    vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
-                }
+                //     vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
+                // }
             };
 
             refresh_grid();
@@ -894,8 +885,13 @@
 
 
     //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - id_list)
-    function id_list (JsonService){
-        var id_listHash = create_obj_for_filter(JsonService.list, &#x27;id&#x27;, &#x27;name&#x27;) 
+    function id_list (){
+
+        var id_listHash = {
+            1: &quot;План&quot;, 
+            2: &quot;В процессе&quot;, 
+            3: &quot;Готово&quot; 
+        };
 
         return function(input) {
             if (!input){
@@ -908,9 +904,12 @@
 
 
     //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - execution_status)
-    function execution_status(JsonService){
-        var execution_statusHash = JsonService.status;
-
+    function execution_status(){
+        var execution_statusHash = {
+            1: &quot;Ожидает&quot;, 
+            2: &quot;В работе&quot;, 
+            3: &quot;Выполнено&quot; 
+        };
         return function(input) {
             if (!input){
               return &#x27;&#x27;;
@@ -920,18 +919,18 @@
         };
     };
 
-    //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - id_user)
-    function id_user(JsonService){
-        var id_usertHash = create_obj_for_filter(JsonService.Users, &#x27;id&#x27;, &#x27;username&#x27;)
-
-        return function(input) {
-            if (!input){
-              return &#x27;&#x27;;
-            } else {
-              return id_usertHash[input];
-            }
-        };
-    }
+    // //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - id_user)
+    // function id_user(JsonService){
+    //     var id_usertHash = create_obj_for_filter(JsonService.Users, &#x27;id&#x27;, &#x27;username&#x27;);
+    //     console.log(id_usertHash);
+    //     return function(input) {
+    //         if (!input){
+    //           return &#x27;&#x27;;
+    //         } else {
+    //           return id_usertHash[input];
+    //         }
+    //     };
+    // }
 
 })();
     </pre>

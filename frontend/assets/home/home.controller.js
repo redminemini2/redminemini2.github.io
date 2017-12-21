@@ -16,7 +16,6 @@
                     .controller('HomeController', HomeController)
                     .filter('id_list', id_list)
                     .filter('execution_status', execution_status)
-                    .filter('id_user', id_user)
 
                  HomeController.$inject = ['UserService', 'JsonService', 'uiGridConstants','$rootScope', '$timeout'];
                 ........
