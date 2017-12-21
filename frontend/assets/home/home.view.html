@@ -8,10 +8,11 @@
 	<a id="cur_user" class="navbar-brand" ng-click="vm.def_click()" href="#">Hi {{vm.user.firstName}}!</a>
 	<a id="logout" href="#!/login" class="btn btn-primary" ng-click="vm.finish_loader()">Logout</a>
 </div>
+<h1>ANGULARJS</h1>
 <hr>
 <!-- <input id="ttt" type='text'  class='datepicker-here' /> -->
 <div class="row">
-	<h3>Задачи. Не более {{vm.tasck_limit}} задач в листе !!!</h3>
+	<h3>DRAGnDROP задачи. Не более {{vm.tasck_limit}} задач в листе !!!</h3>
 
 	<div ui-sortable="vm.sortableOptions" id="screen-{{$index}}" class="apps-container screen floatleft" ng-model="screen" ng-repeat="screen in vm.rawScreens">
 	    <div class="header_tasck_list"> 
@@ -142,9 +143,9 @@
 </div>
 <hr>
 <div class="row">
-	<button class = "floatright" ng-click="vm.addtasck(1)">Добавить задачу</button>
-	<button ng-click="vm.getProductList()">Get ИД и ЛИСТ</button>
-
+	<h3>UI-GRID задачи.</h3>
+	<button class = "floatright" ng-click="vm.addtasck(1)">add tasck</button>
+	<button ng-click="vm.getProductList()">Get id + List</button>
 
 	<div ui-grid="vm.gridOptions" ui-grid-selection class="grid"></div>
 

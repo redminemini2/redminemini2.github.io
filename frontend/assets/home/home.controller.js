@@ -3,12 +3,25 @@
 
     angular
         .module('app')
-        .controller('HomeController', HomeController);
+        .controller('HomeController', HomeController)
+        .filter('id_list', id_list)
+        .filter('execution_status', execution_status)
+        .filter('id_user', id_user)
 
         /**
         * ПРЕДОСТАВЛЕНИЕ ДАННЫХ В ВИДЕ DRAG&DROP И ng-GRID
-            HomeController.$inject = ['UserService', 'JsonService', '$rootScope'];
-            ........
+            
+            (function () {
+                angular
+                    .module('app')
+                    .controller('HomeController', HomeController)
+                    .filter('id_list', id_list)
+                    .filter('execution_status', execution_status)
+                    .filter('id_user', id_user)
+
+                 HomeController.$inject = ['UserService', 'JsonService', 'uiGridConstants','$rootScope', '$timeout'];
+                ........
+
         * @class HomeController
         * @module app
         * @main HomeController
@@ -22,11 +35,13 @@
     /*========================ВСЕ ЧТО НУЖНО ДЛЯ HTML========================*/
         /**
          * <p>ВСЕ ЧТО "ПРЕДАЕТСЯ"" В HTML</p>
-            vm.tasck_limit = 15; //ОГРАНИЧИТЕЛЬ ЗАДАЧ В ЛИСТЕ
+            vm.tasck_limit = 15;
             vm.ngGridView = null;
+
             vm.user = null;
             vm.allUsers = [];
             vm.deleteUser = deleteUser;
+
             vm.exit_modal = exit_modal;
             vm.savetasck = savetasck;
             vm.edittasck = edittasck;
@@ -39,10 +54,13 @@
             vm.my_alert = my_alert;
             vm.change_list = change_list;
             vm.change = false;
+
             vm.rawScreens = [];
             vm.sortingLog = [];
+
             vm.resjsontasks = [];
             vm.resgetJsonLists = [];
+
             vm.sortableOptions = {
                 placeholder: "app",
                 connectWith: ".apps-container",
@@ -69,14 +87,25 @@
                     })
                   }
                 }
-            };
+            }; 
+
+            vm.status = [
+                {id: 1, name:'Ожидает'},
+                {id: 2, name:'В работе'},
+                {id: 3, name:'Выполнено'},
+            ];
+
             $('#dtpckr').datepicker();
+
+            var gridnameJsonLists = [];
+            let curUser = false;
+
          * @property ДАННЫЕ ДЛЯ HTML
          * @type Object
          * @static
          * @final
          */
-        vm.tasck_limit = 15; //ОГРАНИЧИТЕЛЬ ЗАДАЧ В ЛИСТЕ
+        vm.tasck_limit = 15;
         vm.ngGridView = null;
 
         vm.user = null;
@@ -95,11 +124,6 @@
         vm.my_alert = my_alert;
         vm.change_list = change_list;
         vm.change = false;
-        vm.clickHandler = {
-             onClick : function(value){
-                alert('Name: '+value);
-             }
-         };
 
         vm.rawScreens = [];
         vm.sortingLog = [];
@@ -140,25 +164,21 @@
             {id: 2, name:'В работе'},
             {id: 3, name:'Выполнено'},
         ];
-
-
-    /*==============================ИНИЦИАЦИЯ==============================*/
+    /*=====================================================================*/
+        
         $('#dtpckr').datepicker();
 
         var gridnameJsonLists = [];
         let curUser = false;
-
+    /*==============================ИНИЦИАЦИЯ==============================*/
         //ИНИЦИИРУЕМ КОНТРОЛЛЕР
         initController();
 
         //АГРЕГАТНАЯ ФУНКЦИЯ ИНИЦИИ КОНТРОЛЛЕРА СОСТОИТ ИЗ НЕСКОЛЬКИХ "ВЫЗЫВАЮЩИХ"" ФУНКЦИЙ
         function initController() {
 
-            //ЗАГРУЖАЕМ ТЕКУЩЕГО ЮЗЕРА ФАБРИКА UserService
-            // loadCurrentUser(); //frontend/assets/app-services/user.service.js
-
             //ЗАГРУЖАЕМ ВСЕХ ЮЗЕРОВ ФАБРИКА UserService
-            loadAllUsers(); //frontend/assets/app-services/user.service.js       
+            loadAllUsers(); //frontend/assets/app-services/user.service.js
 
             // ИМПОРТИРУЕМ СПИСОК ЛИСТОВ ФАБРИКА UserService
             getJsonLists(); //frontend/assets/app-services/json_service.js
@@ -167,12 +187,11 @@
             getJsonTasks(); //frontend/assets/app-services/json_service.js
 
             // ИМПОРТИРУЕМ СПИСОК ИМЕН СТОЛБЦОВ ГРИДА
-            getJsonGridname();
+            getJsonGridname();   
 
-            //СОЗДАЕМ СОДЕРЖИМОЕ ДЛЯ ДРАГнДРОП ЛИСТОВ
+            //ЗАГРУЖАЕМ ТЕКУЩЕГО ЮЗЕРА + СОЗДАЕМ СОДЕРЖИМОЕ ДЛЯ ДРАГнДРОП ЛИСТОВ
             createSheets(vm.resgetJsonLists);
         }; 
-
     /*==========================ОПЕРАТИВНЫЕ ФУНКЦИИ==========================*/
 
         //ФУНКЦИЯ ИМПОРТА СПИСКА ИМЕН ПОЛЕЙ ГРИДА
@@ -183,6 +202,7 @@
         //ФУНКЦИЯ ИМПОРТА СПИСКА ЛИСТОВ
         function getJsonLists(){
             vm.resgetJsonLists = JsonService.getResultFromJson('db/listsName.json')
+            JsonService.list = vm.resgetJsonLists;
         };
 
         //ФУНКЦИЯ ИМПОРТА СПИСКА ЗАДАЧ
@@ -192,17 +212,22 @@
 
         /**
          * @description ФУНКЦИОНАЛ makeList (id_list):<br>
-         * ВОЗВРАЩАЕТ ОТФИЛЬТРОВАННЫЙ ПО ПОЛЮ - id_list МАССИВ ЗАДАЧ<br>
+         * ВОЗВРАЩАЕТ ОТФИЛЬТРОВАННЫЙ ПО ПОЛЯМ: id_list/id_user МАССИВ ЗАДАЧ<br>
+                
                 function makeList (id_list) {
                     var filter_resjsontasks = [];
-                    filter_resjsontasks = vm.resjsontasks.filter(item => item.id_list == id_list);
+                    if(vm.user.id != 1) {
+                        filter_resjsontasks = vm.resjsontasks.filter(item => item.id_list == id_list && item.id_user == vm.user.id);
+                    }else{
+                        filter_resjsontasks = vm.resjsontasks.filter(item => item.id_list == id_list);
+                    }
                     return filter_resjsontasks;
                 };
+
          * @method makeList
          * @param {Integer} id_list ID ЛИСТА
          * @return {Object} filter_resjsontasks
          */ 
-        //ФУНКЦИЯ НАПОЛНЕНИЯ КАЖДОГО ЛИСТА ЗАДАЧАМИ (ПО id_list) ВЫЗЫВАЕТСЯ ИЗ  createSheets()
         function makeList (id_list) {
             var filter_resjsontasks = [];
             if(vm.user.id != 1) {
@@ -216,18 +241,36 @@
         /**
          * @description ФУНКЦИОНАЛ createSheets (resgetJsonLists):<br>
          * ЦИКЛОМ СОЗДАЮТСЯ ЛИСТЫ. ЛИСТАМ ПРИСВАИВАЕТСЯ ИМЯ И ID<br> СОЗДАННЫЕ ЛИСТЫ ДОБАВЛЯЮТСЯ В МАССИВ vm.rawScreens
+                
                 function createSheets(resgetJsonLists){
-                    for(let i=0; i < resgetJsonLists.length; i++){
-                        vm['list_' + resgetJsonLists[i].id] = makeList(resgetJsonLists[i].id);
-                        vm['list_' + resgetJsonLists[i].id].name = resgetJsonLists[i].name;
-                        vm.rawScreens.push(vm['list_' + resgetJsonLists[i].id]);
-                    };
+                    if(!curUser){
+                        UserService.GetByUsername($rootScope.globals.currentUser.username)
+                        .then(function (user) {
+                            // console.log('user', user);
+                            vm.user = user;
+                            for(let i=0; i < resgetJsonLists.length; i++){
+                                vm['list_' + resgetJsonLists[i].id] = makeList(resgetJsonLists[i].id);
+                                vm['list_' + resgetJsonLists[i].id].name = resgetJsonLists[i].name;
+                                vm.rawScreens.push(vm['list_' + resgetJsonLists[i].id]);
+                            };
+                            curUser = true;
+                            //СОЗДАЁМ ГРИД
+                            initGrid();
+                        });
+                    }else{
+                        for(let i=0; i < resgetJsonLists.length; i++){
+                            vm['list_' + resgetJsonLists[i].id] = makeList(resgetJsonLists[i].id);
+                            vm['list_' + resgetJsonLists[i].id].name = resgetJsonLists[i].name;
+                            vm.rawScreens.push(vm['list_' + resgetJsonLists[i].id]);
+                        };
+                    }
                 };
+
+         * ПРИ ПЕРВОМ ПРОХОДЕ СОЗДАЕМ ГРИД 
          * @method createSheets
          * @param {Object} resgetJsonLists МАССИВ ИМЕН ЛИСТОВ
          */ 
         //ФУНКЦИЯ СОЗДАНИЯ ЛИСТОВ
-        
         function createSheets(resgetJsonLists){
             if(!curUser){
                 UserService.GetByUsername($rootScope.globals.currentUser.username)
@@ -262,45 +305,90 @@
             
             for(let j=0; j < tt.length; j++){
                 if(tt[j].id != "$$hashKey") {
-                    if(tt[j].id == "execution_status" || tt[j].id == "id_list"){
-                        if(tt[j].id == "execution_status") {
-                            myCelTemp = myCelTemp1;
-                        }else{
-                            myCelTemp = myCelTemp2;
-                        };
-                        str = '{"field" : "' + tt[j].id + '"' + ',' + '"cellTemplate" : "' + myCelTemp + '"}' //' + '"enableFiltering" : ' + false + 
-                        vm.ngGridView.columnDefs.push(JSON.parse(str)); 
-                    }else{
-                        str = '{"field" : "' + tt[j].id + '"' + ',' + '"displayName" : "' + gridnameJsonLists[j].id + '"}' //' + '"enableFiltering" : ' + false + 
-                        vm.ngGridView.columnDefs.push(JSON.parse(str)); 
-                    }
-                }
+                        str = '{"field" : "' + tt[j].id + '"' + ',' + '"displayName" : "' + gridnameJsonLists[j].gridname + '"}' 
+                        vm.gridOptions.columnDefs.push(JSON.parse(str)); 
+                };
             };
+
          * 6. СКРЫВАЕМ ПОЛЕ ЕСЛИ ОНО ПРИСУТСТВУЕТ В МАССИВЕ notVisible ДЛЯ ОСТАЛЬНЫХ - ПЕРЕИМЕНОВЫВАЕМ ПОЛЯ ГРИДА
             
+            let notVisible = ['id'];//'id_list'
+
+            //СКРЫВАЕМ ПОЛЕ ЕСЛИ ОНО ПРИСУТСТВУЕТ В МАССИВЕ notVisible ДЛЯ ОСТАЛЬНЫХ - ПЕРЕИМЕНОВЫВАЕМ ПОЛЯ ГРИДА
             for(let j=0; j < notVisible.length; j++){
-                for(let i=0; i < vm.ngGridView.columnDefs.length; i++){
-                    if(vm.ngGridView.columnDefs[i].field == notVisible[j]){
-                        vm.ngGridView.columnDefs[i].visible = false;
+                for(let i=0; i < vm.gridOptions.columnDefs.length; i++){
+                    if(vm.gridOptions.columnDefs[i].field == notVisible[j]){
+                        vm.gridOptions.columnDefs[i].visible = false;
                     }else{
                         //НАХОДИМ ПО id (j) ИНДЕКС ЗАДАЧИ В МАССИВЕ vm.resjsontasks
-                        let firstIndex = find_index_by_id(gridnameJsonLists, vm.ngGridView.columnDefs[i].field);
-                        vm.ngGridView.columnDefs[i].displayName = gridnameJsonLists[firstIndex].gridname;
-                        vm.ngGridView.columnDefs[i].width = gridnameJsonLists[firstIndex].width;
+                        let firstIndex = find_index_by_id(gridnameJsonLists, vm.gridOptions.columnDefs[i].field);
+                        vm.gridOptions.columnDefs[i].displayName = gridnameJsonLists[firstIndex].gridname;
+                        vm.gridOptions.columnDefs[i].width = gridnameJsonLists[firstIndex].width;
                     }
                 }
             };
+
          * 7. ДОБАВЛЯЕМ КНОПКИ РЕДАКТИРОВАНИЯ И УДАЛЕНИЯ
+         * 8. ДОБАВЛЯЕММ ФИЛЬТРЫ  И ОТМЕНЯЕМ ФИЛЬТРЫ ДЛЯ КНОПОК
+
+            for(let j=0; j < vm.gridOptions.columnDefs.length; j++){
+                
+                if(vm.gridOptions.columnDefs[j].field == "id_list" || vm.gridOptions.columnDefs[j].field == "execution_status"){
+                    if(vm.gridOptions.columnDefs[j].field == "id_list") {
+                        myFilter = myList
+                    } else  {
+                        myFilter = myStatus
+                    }
+
+                    str = '{' 
+                        + '"type" : "select",' 
+                        + '"selectOptions"  : [ '
+                        + myFilter 
+                    + ']}'
+
+                    vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
+
+                    if(vm.gridOptions.columnDefs[j].field == "id_list") {
+                        vm.gridOptions.columnDefs[j].cellFilter = 'id_list';
+                    }else{
+                        vm.gridOptions.columnDefs[j].cellFilter = 'execution_status';
+                    }
+
+                };
+
+                if(vm.gridOptions.columnDefs[j].field == "edit" || vm.gridOptions.columnDefs[j].field == "delete") vm.gridOptions.columnDefs[j].enableFiltering = false;
+                if(vm.gridOptions.columnDefs[j].field == "id_user") {
+                    vm.gridOptions.columnDefs[j].cellFilter = 'id_user';
+                    
+                    let dropDown;
+
+                    if(vm.user.id == 1) {
+                        vm.allUsers.map(item => dropDown = dropDown + '{"value": "' + item.id + '", "label": "' + item.username + '" },');
+                    }else{
+                        vm.allUsers.map(item => {
+                            if(item.id == vm.user.id) {
+                                dropDown = dropDown + '{"value": "' + item.id + '", "label": "' + item.username + '" },'
+                            }
+                        })
+                    }
+                    
+                    str = '{' 
+                        + '"type" : "select",' 
+                        + '"selectOptions"  :  ['
+                        + dropDown.slice(9,-1) 
+                    + ']}';
+
+                    vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
+                }
+            };
+
          * @method initGrid
          */
         //ФУНКЦИЯ СОЗДАНИЯ ГРИДА
         function initGrid() {
             vm.gridOptions = {
                 enableCellEdit: false,
-                multiSelect: true,
                 enableColumnResizing: true,
-                enableRowSelection: false,
-                enableSelectAll: true,
                 enableFiltering: true,
                 showGridFooter:true,
                 onRegisterApi: function(gridApi){
@@ -354,14 +442,8 @@
             let myList = '{"value": "1", "label": "План" }, { "value": "2", "label": "В процессе" }, { "value": "3", "label": "Готово"}'
             let myStatus = '{"value": "1", "label": "Ожидает" }, { "value": "2", "label": "В работе" }, { "value": "3", "label": "Выполнено"}'
             let myFilter;
-            
-            vm.arrlist = [
-                { 1: "Ожидает" }, 
-                { 2: "В работе" }, 
-                { 3: "Выполнено"}
-            ];
 
-            //ДОБАВЛЯЕММ ФИЛЬТРЫ SELECT И ОТМЕНЯЕМ ФИЛЬТРЫ ДЛЯ КНОПОК
+            //ДОБАВЛЯЕММ ФИЛЬТРЫ  И ОТМЕНЯЕМ ФИЛЬТРЫ ДЛЯ КНОПОК
             for(let j=0; j < vm.gridOptions.columnDefs.length; j++){
                 
                 if(vm.gridOptions.columnDefs[j].field == "id_list" || vm.gridOptions.columnDefs[j].field == "execution_status"){
@@ -380,36 +462,38 @@
                     vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
 
                     if(vm.gridOptions.columnDefs[j].field == "id_list") {
-
-                        //     let myCelTempl = '<select  ng-cell-input '
-                        //         + 'ng-options=\'s.id as s.value for s in vm.arrlist\''
-                        //         + 'ng-class=\'colt\''
-                        //         + 'ng-model=\'COL_FIELD\''
-                        //         + 'ng-input=\'COL_FIELD\''
-                        //         + 'data-placeholder=\'-- Select One --\'>'
-                        //     + '</select>'
-
-                        // vm.gridOptions.columnDefs[j].cellTemplate = myCelTempl;
-                        // vm.gridOptions.columnDefs[j].enableCellEdit = true;
-
-                        vm.gridOptions.columnDefs[j].name = "id_list"
-                        vm.gridOptions.columnDefs[j].editDropdownValueLabel = "id_list"
-                        vm.gridOptions.columnDefs[j].editableCellTemplate = "ui-grid/dropdownEditor"
-                        vm.gridOptions.columnDefs[j].editDropdownOptionsArray = vm.arrlist
+                        vm.gridOptions.columnDefs[j].cellFilter = 'id_list';
+                    }else{
+                        vm.gridOptions.columnDefs[j].cellFilter = 'execution_status';
                     }
 
                 };
 
                 if(vm.gridOptions.columnDefs[j].field == "edit" || vm.gridOptions.columnDefs[j].field == "delete") vm.gridOptions.columnDefs[j].enableFiltering = false;
-            
-                // if(vm.gridOptions.columnDefs[j].field == "date" ){
-                //     vm.gridOptions.columnDefs[j].type = 'date',
-                //     vm.gridOptions.columnDefs[j].cellFilter = 'date:"yyyy-MM-dd"'
-                // }
-            };
-            // console.log(vm.gridOptions.columnDefs);
+                if(vm.gridOptions.columnDefs[j].field == "id_user") {
+                    vm.gridOptions.columnDefs[j].cellFilter = 'id_user';
+                    
+                    let dropDown;
 
-            // vm.gridOptions.multiSelect = true;
+                    if(vm.user.id == 1) {
+                        vm.allUsers.map(item => dropDown = dropDown + '{"value": "' + item.id + '", "label": "' + item.username + '" },');
+                    }else{
+                        vm.allUsers.map(item => {
+                            if(item.id == vm.user.id) {
+                                dropDown = dropDown + '{"value": "' + item.id + '", "label": "' + item.username + '" },'
+                            }
+                        })
+                    }
+                    
+                    str = '{' 
+                        + '"type" : "select",' 
+                        + '"selectOptions"  :  ['
+                        + dropDown.slice(9,-1) 
+                    + ']}';
+
+                    vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
+                }
+            };
 
             refresh_grid();
         };
@@ -497,7 +581,7 @@
          * @description ФУНКЦИОНАЛ addtasck (i):<br>
          * 1. ФОРМИРУЕТ ИЗ СТРОКИ ОБЪЕКТ-ЗАДАЧУ<br> 
          * 2. ДОБАВЛЯЕТ ОБЪЕКТ В vm.resjsontasks <br>
-         * 3. ОБНОВЛЯЕТ vm.rawScreens
+         * 3. ОБНОВЛЯЕТ vm.rawScreens И ГРИД
          * @method addtasck
          * @param {Integer} i НОМЕР ЛИСТА DRAG&DROP
          */ 
@@ -533,8 +617,7 @@
                 };
                 str = str.slice(0,-1)
                 str = str + '}';
-                // vm.rawScreens.push(JSON.parse(str));
-                // vm['list_' + i].push(JSON.parse(str));
+
                 vm.resjsontasks.push(JSON.parse(str));
 
                 refresh_rawScreens();
@@ -682,6 +765,7 @@
             UserService.GetAll()
                 .then(function (users) {
                     vm.allUsers = users;
+                    JsonService.Users = vm.allUsers;
                 });
         };
 
@@ -693,6 +777,60 @@
                 });
         };
 
+    };
+
+    /*===================ФИЛЬТРЫ ДЛЯ ЗАМЕНЫ ДАННЫХ В ГРИДЕ===================*/
+
+    //КОНВЕРТАЦИЯ МАССИВА ОБЪЕКТОВ В ОБЪЕКТ ДЛЯ ФИЛЬТРОВ
+    function create_obj_for_filter(obj, obj_id, obj_field){
+        let objFilter = '{';
+        for(let j=0; j < obj.length; j++){
+            objFilter = objFilter + '"' + obj[j][obj_id] + '"' + ': ' + '"' + obj[j][obj_field] + '"' + ', '
+        };
+
+        objFilter = objFilter.slice(0,-2) + '}';
+        return JSON.parse(objFilter)
+    };
+
+
+    //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - id_list)
+    function id_list (JsonService){
+        var id_listHash = create_obj_for_filter(JsonService.list, 'id', 'name') 
+
+        return function(input) {
+            if (!input){
+              return '';
+            } else {
+              return id_listHash[input];
+            }
+        };
+    };
+
+
+    //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - execution_status)
+    function execution_status(JsonService){
+        var execution_statusHash = JsonService.status;
+
+        return function(input) {
+            if (!input){
+              return '';
+            } else {
+              return execution_statusHash[input];
+            }
+        };
+    };
+
+    //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - id_user)
+    function id_user(JsonService){
+        var id_usertHash = create_obj_for_filter(JsonService.Users, 'id', 'username')
+
+        return function(input) {
+            if (!input){
+              return '';
+            } else {
+              return id_usertHash[input];
+            }
+        };
     }
 
 })();

@@ -14,7 +14,7 @@
 	{
 		"id":"description",
 		"gridname":"Описание",
-		"width":"295",
+		"width":"240",
 		"sort":4
 	},
 	{
@@ -50,13 +50,13 @@
 	{
 		"id":"id_list",
 		"gridname":"Лист",
-		"width":"70",
-		"sort":1
+		"width":"100",
+		"sort":1.1
 	},
 	{
 		"id":"id_user",
 		"gridname":"User",
-		"width":"70",
+		"width":"100",
 		"sort":1
 	}
 ]

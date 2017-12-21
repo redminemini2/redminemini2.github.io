@@ -12,7 +12,7 @@
      * ТОЧКА ВХОДА - ФАЙЛ frontend/js/app.js (самовызывающаяся функция).
 
         angular
-            .module('app',  ['ngGrid', 'ngRoute', 'ngCookies', 'ui.sortable'])
+            .module('app',  ['ui.grid', 'ui.grid.selection', 'ngRoute', 'ngCookies', 'ui.sortable'])
             .config(config)
             .run(run);
 

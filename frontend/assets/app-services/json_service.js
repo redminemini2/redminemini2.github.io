@@ -16,6 +16,13 @@
         var service = {};
 
         service.getResultFromJson = getResultFromJson;
+        service.list = [];
+        service.Users = [];
+        service.status = {
+          1: "Ожидает", 
+          2: "В работе", 
+          3: "Выполнено" 
+        };
 
         return service;
 
