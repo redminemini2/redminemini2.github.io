@@ -55,7 +55,7 @@
 	},
 	{
 		"id":"id_user",
-		"gridname":"User",
+		"gridname":"UserID",
 		"width":"100",
 		"sort":1
 	}

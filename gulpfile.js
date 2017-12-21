@@ -65,6 +65,7 @@ const wbpck = function(callback) {
       app: './frontend/js/app',
       authenticationservice: './frontend/assets/app-services/authenticationservice',
       flashservice: './frontend/assets/app-services/flashservice',
+      json_service: './frontend/assets/app-services/json_service',
       user_service_localstorage: './frontend/assets/app-services/user_service_localstorage',
       home_controller: './frontend/assets/home/home.controller',
       login_controller: './frontend/assets/login/login.controller',

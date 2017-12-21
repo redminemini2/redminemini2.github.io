@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     'use strict';
 
     angular
@@ -6,9 +6,10 @@
         .controller('HomeController', HomeController)
         .filter('id_list', id_list)
         .filter('execution_status', execution_status)
+        .filter('id_user', id_user)
 
         /**
-         * ПРЕДОСТАВЛЕНИЕ ДАННЫХ В ВИДЕ DRAG&DROP И ng-GRID
+        * ПРЕДОСТАВЛЕНИЕ ДАННЫХ В ВИДЕ DRAG&DROP И ng-GRID
             
             (function () {
                 angular
@@ -21,10 +22,11 @@
                  HomeController.$inject = ['UserService', 'JsonService', 'uiGridConstants','$rootScope', '$timeout'];
                 ........
 
-         * @class HomeController
-         * @module app
-         * @main HomeController
-         */
+        * @class HomeController
+        * @module app
+        * @main HomeController
+        */
+
     HomeController.$inject = ['UserService', 'JsonService', 'uiGridConstants','$rootScope', '$timeout'];
 
     function HomeController(UserService, JsonService, uiGridConstants, $rootScope, $timeout) {
@@ -162,7 +164,6 @@
             {id: 2, name:'В работе'},
             {id: 3, name:'Выполнено'},
         ];
-
     /*=====================================================================*/
         
         $('#dtpckr').datepicker();
@@ -469,30 +470,29 @@
                 };
 
                 if(vm.gridOptions.columnDefs[j].field == "edit" || vm.gridOptions.columnDefs[j].field == "delete") vm.gridOptions.columnDefs[j].enableFiltering = false;
-                
-                // if(vm.gridOptions.columnDefs[j].field == "id_user") {
-                //     vm.gridOptions.columnDefs[j].cellFilter = 'id_user';
+                if(vm.gridOptions.columnDefs[j].field == "id_user") {
+                    vm.gridOptions.columnDefs[j].cellFilter = 'id_user';
                     
-                //     let dropDown;
+                    let dropDown;
 
-                //     if(vm.user.id == 1) {
-                //         vm.allUsers.map(item => dropDown = dropDown + '{"value": "' + item.id + '", "label": "' + item.username + '" },');
-                //     }else{
-                //         vm.allUsers.map(item => {
-                //             if(item.id == vm.user.id) {
-                //                 dropDown = dropDown + '{"value": "' + item.id + '", "label": "' + item.username + '" },'
-                //             }
-                //         })
-                //     }
+                    if(vm.user.id == 1) {
+                        vm.allUsers.map(item => dropDown = dropDown + '{"value": "' + item.id + '", "label": "' + item.username + '" },');
+                    }else{
+                        vm.allUsers.map(item => {
+                            if(item.id == vm.user.id) {
+                                dropDown = dropDown + '{"value": "' + item.id + '", "label": "' + item.username + '" },'
+                            }
+                        })
+                    }
                     
-                //     str = '{' 
-                //         + '"type" : "select",' 
-                //         + '"selectOptions"  :  ['
-                //         + dropDown.slice(9,-1) 
-                //     + ']}';
+                    str = '{' 
+                        + '"type" : "select",' 
+                        + '"selectOptions"  :  ['
+                        + dropDown.slice(9,-1) 
+                    + ']}';
 
-                //     vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
-                // }
+                    vm.gridOptions.columnDefs[j].filter = JSON.parse(str);
+                }
             };
 
             refresh_grid();
@@ -794,13 +794,8 @@
 
 
     //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - id_list)
-    function id_list (){
-
-        var id_listHash = {
-            1: "План", 
-            2: "В процессе", 
-            3: "Готово" 
-        };
+    function id_list (JsonService){
+        var id_listHash = create_obj_for_filter(JsonService.list, 'id', 'name') 
 
         return function(input) {
             if (!input){
@@ -813,12 +808,9 @@
 
 
     //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - execution_status)
-    function execution_status(){
-        var execution_statusHash = {
-            1: "Ожидает", 
-            2: "В работе", 
-            3: "Выполнено" 
-        };
+    function execution_status(JsonService){
+        var execution_statusHash = JsonService.status;
+
         return function(input) {
             if (!input){
               return '';
@@ -828,17 +820,17 @@
         };
     };
 
-    // //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - id_user)
-    // function id_user(JsonService){
-    //     var id_usertHash = create_obj_for_filter(JsonService.Users, 'id', 'username');
-    //     console.log(id_usertHash);
-    //     return function(input) {
-    //         if (!input){
-    //           return '';
-    //         } else {
-    //           return id_usertHash[input];
-    //         }
-    //     };
-    // }
+    //ЗАМЕНА ДАННЫХ В ГРИДЕ (ПОЛЕ - id_user)
+    function id_user(JsonService){
+        var id_usertHash = create_obj_for_filter(JsonService.Users, 'id', 'username')
+
+        return function(input) {
+            if (!input){
+              return '';
+            } else {
+              return id_usertHash[input];
+            }
+        };
+    }
 
 })();
