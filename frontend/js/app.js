@@ -22,7 +22,7 @@
      */
 
     angular
-        .module('app',  ['ui.grid', 'ui.grid.selection', 'ngRoute', 'ngCookies', 'ui.sortable'])
+        .module('app',  ['ui.grid', 'ui.grid.selection', 'ngRoute', 'ngCookies', 'ui.sortable', 'ui.grid.exporter'])
         .config(config)
         .run(run);
 

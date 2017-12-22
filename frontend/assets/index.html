@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="ru" ng-app="app">
+<html lang="en" ng-app="app">
 <head>
     <meta charset="utf-8" />
     <title>Redmine mini</title>
@@ -12,6 +12,11 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
 <script src="//code.angularjs.org/1.6.0/angular.min.js"></script>
+
+    <script src="http://ui-grid.info/docs/grunt-scripts/csv.js"></script>
+    <script src="http://ui-grid.info/docs/grunt-scripts/pdfmake.js"></script>
+    <script src="http://ui-grid.info/docs/grunt-scripts/vfs_fonts.js"></script>
+
 <!-- =================================================================== -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-grid/4.0.6/ui-grid.min.css" type="text/css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-grid/4.0.6/ui-grid.min.js"></script>
@@ -61,7 +66,7 @@
 
     <!--Fake user service for demo that uses local storage -->
     <script src="js/user_service_localstorage.js"></script>
-    <script src="js/json_service.js"></script>
+    <script src="js/home_service.js"></script>
 
     <script src="js/home_controller.js"></script>
     <script src="js/login_controller.js"></script>

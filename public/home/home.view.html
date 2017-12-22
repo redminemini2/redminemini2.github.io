@@ -144,10 +144,21 @@
 <hr>
 <div class="row">
 	<h3>UI-GRID задачи.</h3>
-	<button class = "floatright" ng-click="vm.addtasck(1)">add tasck</button>
-	<button ng-click="vm.getProductList()">Get id + List</button>
+	<div id="address">
+		<form>
+			<input type="text" placeholder="Введите адрес получателя" ng-model='vm.mailAddress'>
+			<input type="submit" class = "btn btn-primary" value="Отправить"  ng-click="vm.gmail()">
+		</form>
+	</div>
+	<p>
+		<button style = "color: black" class = "btn btn-primary floatright" ng-click="vm.addtasck(1)">add tasck</button>
+		<button style = "color: yellow" class = "btn btn-primary" ng-click="vm.getProductList()">Get id + List</button>
+		<button class = "btn btn-success" ng-click="vm.exportPDF()">PDF</button>
+		<button class = "btn btn-success" ng-click="vm.exportCSV()">CSV</button>
+		<button class = "btn btn-success" ng-click="vm.address()">MAIL(php)</button>
+	</p>
 
-	<div ui-grid="vm.gridOptions" ui-grid-selection class="grid"></div>
+	<div ui-grid="vm.gridOptions" ui-grid-selection ui-grid-exporter class="grid"></div>
 
 	<button type="button" ng-click="vm.logModels()">Log Lists</button>
 	<ul class="list logList">
