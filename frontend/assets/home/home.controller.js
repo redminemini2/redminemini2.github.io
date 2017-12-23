@@ -412,6 +412,8 @@
             //ФУНКЦИЯ СОЗДАНИЯ ГРИДА
             function initGrid() {
                 vm.gridOptions = {
+                    paginationPageSizes: [2, 3, 5, 10],
+                    paginationPageSize: 10,
                     enableGridMenu: true,
                     enableCellEdit: false,
                     enableColumnResizing: true,
@@ -420,7 +422,16 @@
                     onRegisterApi: function onRegisterApi(gridApi) {
                         vm.gridApi = gridApi;
                     },
-                    columnDefs: []
+                    columnDefs: [],
+                    gridMenuCustomItems: [
+                    {
+                        title: "Внешняя функция1",
+                        action: function($event){
+                            alert('!!!!!!!!!!!');
+                        },
+                        icon: "fa fa-pencil-square-o"
+                    }
+                    ]
                 };
 
                 var str = void 0;
