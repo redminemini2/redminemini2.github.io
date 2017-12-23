@@ -1,1 +1,68 @@
-!function(){"use strict";function e(e,t,r,o){var s=this;s.register=function(){s.dataLoading=!0,e.Create(s.user).then(function(e){e.success?(o.Success("Registration successful",!0),t.path("/login")):(o.Error(e.message),s.dataLoading=!1)})}}angular.module("app").controller("RegisterController",e),e.$inject=["UserService","$location","$rootScope","FlashService"]}();
+(function () {
+    'use strict';
+
+    angular
+        .module('app')
+        .controller('RegisterController', RegisterController);
+
+    /**
+    * РЕГИСТРАЦИЯ ПОЛЬЗОВАТЕЛЯ
+
+        angular
+            .module('app')
+            .controller('RegisterController', RegisterController);
+
+        RegisterController.$inject = ['UserService',  '$location', '$rootScope', 'FlashService'];
+
+        function RegisterController(UserService, $location, $rootScope, FlashService) {
+            var vm = this;
+
+            vm.register = register;
+
+            function register() {
+                vm.dataLoading = true;
+                UserService.Create(vm.user)
+                    .then(function (response) {
+                        if (response.success) {
+                            FlashService.Success('Registration successful', true);
+                            $location.path('/login');
+                        } else {
+                            FlashService.Error(response.message);
+                            vm.dataLoading = false;
+                        }
+                    });
+            }
+        }
+
+    * @class RegisterController
+    * @module app
+    * @main RegisterController
+    */
+
+    RegisterController.$inject = ['UserService',  '$location', '$rootScope', 'FlashService'];
+
+    function RegisterController(UserService, $location, $rootScope, FlashService) {
+        var vm = this;
+
+        vm.register = register;
+
+        /**
+        * register <br> СОЗДАЕТ (РЕГИСТРУЕТ) ПОЛЬЗОВАТЕЛЯ <br> ИНФОРМИРУЕТ О РЕЗУЛЬТАТЕ РЕГИСТРАЦИИ <br> ПЕРЕХОД НА СТРАНИЦУ АУТЕНТИФИКАЦИИ ( $location.path('/login'); )
+        * @method register
+        */
+
+        function register() {
+            vm.dataLoading = true;
+            UserService.Create(vm.user)
+                .then(function (response) {
+                    if (response.success) {
+                        FlashService.Success('Registration successful', true);
+                        $location.path('/login');
+                    } else {
+                        FlashService.Error(response.message);
+                        vm.dataLoading = false;
+                    }
+                });
+        }
+    }
+})();
