@@ -843,27 +843,34 @@
                     vm.csvContent = exportService.formatAsCsv(exportColumnHeaders, exportData, grid.options.exporterCsvColumnSeparator = ';');
                 
                     let tbl;
+                    let hideField = [];
                     let t = vm.csvContent.split('\n')
                     tbl = '<tr>'
                     for (var i = 0; i < t.length; i++) {
                         let tt = t[i].split(';');
                         
                         for (var j = 0; j < tt.length; j++) {
-
-                            if(i==0){ 
-                                tbl = tbl + '<th>' + tt[j] + '</th>'; 
+                            
+                            if(i==0){ // Убираем "" в заголовке
+                                if(tt[j] != '"..."') {
+                                    tt[j] = tt[j].replace('"', '');
+                                    tt[j] = tt[j].replace('"', '');
+                                    tbl = tbl + '<th>' + tt[j] + '</th>'; 
+                                }else{
+                                    hideField.push(j);
+                                }
                             }else{
-                                tbl = tbl + '<td>' + tt[j] + '</td>'; 
+                                if(hideField.indexOf(j) == -1){ //не выводим поля кнопок
+                                    tbl = tbl + '<td>' + tt[j] + '</td>';
+                                }
                             }
                         }
                         tbl = tbl + '</tr>'
                     };
-
-
                     // console.log(tbl);
-        
+
                     $.ajax({
-                        url: "../mail.php",
+                        url: "../db/mail.php",
                         type: "POST",
                         data: { to: vm.mailAddress, sub: "Export", emailbody: tbl},
                         dataType: "html",
